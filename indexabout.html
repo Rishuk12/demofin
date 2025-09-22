@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About Us - Avanti</title>
+  <meta name="description" content="Avanti - Aapka Apna Bharosemand Saathi | Fresh Vegetables, Fruits, Milk & Puja Flowers" />
+  <style>
+    :root{
+      --accent:#2f855a; /* green */
+      --muted:#6b7280;
+      --card:#ffffff;
+      --bg:#f7fafc;
+      --radius:18px;
+      --shadow: 0 6px 18px rgba(45,55,72,0.12);
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial; margin:0; background:var(--bg); color:#0f172a; line-height:1.5}
+
+    .container{max-width:1100px; margin:28px auto; padding:20px}
+
+    /* Header */
+    .hero{display:flex; gap:18px; align-items:center; background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3)); padding:18px; border-radius:24px; box-shadow:var(--shadow)}
+    .logo-wrap{width:90px; height:90px; border-radius:50%; background:linear-gradient(180deg,#fff,#f1f5f9); display:flex; align-items:center; justify-content:center; overflow:hidden; transform-style:preserve-3d; transition:transform .22s ease, box-shadow .22s ease; box-shadow: 0 8px 20px rgba(47,72,52,0.08)}
+    .logo-wrap:hover{transform:translateY(-6px) rotateX(6deg); box-shadow: 0 18px 36px rgba(47,72,52,0.12)}
+    .logo-wrap img{width:78px; height:78px; object-fit:contain}
+
+    .hero-title{flex:1}
+    .brand{font-size:20px; font-weight:700; color:var(--accent); margin:0}
+    .tag{color:var(--muted); margin-top:6px}
+
+    /* Cards */
+    .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-top:18px}
+    .card{background:var(--card); padding:18px; border-radius:var(--radius); box-shadow:var(--shadow);}
+
+    .pill{display:inline-block; background:#ecfdf5; color: #14532d; padding:6px 12px; border-radius:999px; font-weight:600; font-size:13px}
+
+    /* About text */
+    h2{margin:0 0 10px 0}
+    p.lead{color:var(--muted); margin:0 0 14px 0}
+
+    /* CTA */
+    .cta{display:flex; gap:12px; margin-top:14px}
+    .btn{padding:10px 14px; border-radius:12px; border:0; cursor:pointer; font-weight:700}
+    .btn-primary{background:var(--accent); color:white}
+    .btn-ghost{background:transparent; color:var(--accent); border:2px solid rgba(47,72,90,0.06)}
+
+    /* list */
+    ul.features{padding-left:18px; margin:12px 0}
+    ul.features li{margin:8px 0}
+
+    /* Short block (for footer/home) */
+    .short{display:flex; align-items:center; gap:12px; padding:12px; border-radius:12px; background:linear-gradient(90deg,#ffffff,#fbfffd)}
+
+    /* Responsive */
+    @media (max-width:880px){
+      .grid{grid-template-columns:1fr}
+      .hero{flex-direction:row}
+      .logo-wrap{width:78px;height:78px}
+    }
+
+    /* Small details */
+    footer{margin-top:28px; text-align:center; color:var(--muted)}
+
+    /* Decorative 3D progress tracker (simple) */
+    .tracker{height:14px; background:linear-gradient(90deg,#e6ffed 0%, #e6ffed var(--p,30%), #f1f5f9 var(--p,30%)); border-radius:999px; box-shadow:inset 0 -3px 8px rgba(2,6,23,0.03)}
+
+    /* editable fields look */
+    .meta small{display:block; color:var(--muted)}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="hero">
+      <div class="logo-wrap">
+        <!-- Replace assets/logo.png with your real logo file -->
+        <img src="avantilogo.png" alt="Avanti logo" />
+      </div>
+      <div class="hero-title">
+        <p class="pill">Seedha Khet se Ghar Tak</p>
+        <h1 class="brand">Avanti — Aapka Apna Bharosemand Saathi</h1>
+        <p class="tag">Taaza sabzi, phal, doodh aur puja phool — 100% shuddhata aur subah-subah delivery</p>
+      </div>
+      <div style="min-width:160px; text-align:right">
+        <div class="meta">
+          <small>Delivery Slot</small>
+          <strong>5 AM – 9 AM</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid" style="margin-top:22px">
+      <section class="card">
+        <h2>Hamari Kahani</h2>
+        <p class="lead">Avanti ka mission hai ki har ghar tak taazgi pohche — seedhe farms se, beechwale hataye kar. Hum chahte hain ki aapko mile har din fresh aur reliable products bina jhanjhat ke.</p>
+
+        <p>Hum local farmers aur trusted suppliers ke saath milkar kaam karte hain. Supply chain ko chhota rakhkar hum freshness, fair prices aur transparency preserve karte hain. Aapka bharosa hamare liye sabse important hai.</p>
+
+        <div style="margin-top:12px">
+          <strong>Kyun Avanti?</strong>
+          <ul class="features">
+            <li>100% Taaza aur Natural Products</li>
+            <li>Subah-subah Fresh Delivery (5 AM – 9 AM)</li>
+            <li>Market-competitive prices & transparent billing</li>
+            <li>Vegetables, Fruits, Milk & Puja Flowers ek hi jagah</li>
+          </ul>
+        </div>
+
+        <div class="cta">
+          <button class="btn btn-primary" onclick="scrollToContact()">Order Now</button>
+          <button class="btn btn-ghost" onclick="toggleShort()">Show Short Version</button>
+        </div>
+      </section>
+
+      <aside class="card">
+        <h2>Humari Values</h2>
+        <p class="lead">Sehat, Shuddhata aur Bharosa — ye hamare teen pillars hain.</p>
+
+        <div style="margin-top:12px">
+          <strong>Seedha Khet se:</strong>
+          <p style="margin:6px 0">Hum middlemen reduce karte hain taaki fresh produce aur fair prices dono milein.</p>
+        </div>
+
+        <div style="margin-top:8px">
+          <strong>Sustainability & Local Support</strong>
+          <p style="margin:6px 0">Local farmers ko support karke hum sustainable sourcing karte hain.</p>
+        </div>
+
+        <div style="margin-top:12px">
+          <strong>Customer Promise</strong>
+          <p style="margin:6px 0">Agar kisi bhi reason se aap satisfied nahi ho, humare support team 24/7 aapki madad karegi.</p>
+        </div>
+
+        <div style="margin-top:14px">
+          <small>Progress towards 21st order reward</small>
+          <div class="tracker" id="tracker" style="--p:60%"></div>
+          <small style="display:block; margin-top:8px; color:var(--muted)">Orders completed: 12 / 21</small>
+        </div>
+      </aside>
+
+      <!-- Full-width: Team or contact -->
+      <section class="card" style="grid-column:1 / -1; margin-top:8px">
+        <h2>Contact & Quick Info</h2>
+        <p class="lead">Hamare contact details aur delivery areas aap yahan dekh sakte hain. Admin panel se ye sab editable rakha gaya hai.</p>
+
+        <div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:12px">
+          <div style="flex:1; min-width:220px">
+            <strong>Address</strong>
+            <p>Patna, Newatwarpur </p>
+          </div>
+          <div style="flex:1; min-width:220px">
+            <strong>Phone / WhatsApp</strong>
+            <p>9334490327</p>
+          </div>
+          <div style="flex:1; min-width:220px">
+            <strong>Delivery Areas</strong>
+            <p>Currently: All of Patna </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Short version card for copy-paste -->
+      <section class="card" style="grid-column:1 / -1">
+        <h2>Short Version (Footer / Homepage)</h2>
+        <div class="short">
+          <div style="flex:1">
+            <strong>Avanti – Aapka apna bharosemand saathi</strong>
+            <div style="color:var(--muted); margin-top:6px">"Avanti – Aapka apna bharosemand saathi, jo khet se taaza sabzi, phal, doodh aur puja phool aapke ghar tak laata hai. Hum promise karte hain 100% freshness, sahi daam aur subah-subah delivery."</div>
+          </div>
+          <div style="min-width:120px; text-align:right">
+            <button class="btn btn-primary" onclick="copyShort()">Copy Text</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <small>© <span id="year"></span> Avanti. All rights reserved. Designed for Farm2Home / Avanti.</small>
+    </footer>
+
+  </div>
+
+  <script>
+    // small helpers for interactivity
+    document.getElementById('year').innerText = new Date().getFullYear();
+
+    function copyShort(){
+      const txt = 'Avanti – Aapka apna bharosemand saathi, jo khet se taaza sabzi, phal, doodh aur puja phool aapke ghar tak laata hai. Hum promise karte hain 100% freshness, sahi daam aur subah-subah delivery.';
+      navigator.clipboard.writeText(txt).then(()=>{
+        alert('Short about us text copied to clipboard!');
+      }).catch(()=>{
+        alert('Copy failed — please select and copy manually.');
+      })
+    }
+
+    function toggleShort(){
+      // simple behavior: scroll to the short section for quick copy
+      const el = document.querySelector('section.card:nth-of-type(4)');
+      if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+
+    function scrollToContact(){
+      const el = document.querySelector('section.card:nth-of-type(3)');
+      if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  </script>
+</body>
+</html>
