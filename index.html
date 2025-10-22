@@ -1184,6 +1184,33 @@ function setActiveButton(btn) {
     grid-template-columns: 1fr !important;
   }
 }
+/* ✅ Alternate selector for mobile 2-column layout */
+@media (max-width: 768px) {
+  .vegSection,
+  .fruitSection,
+  .flowerSection,
+  .combo-section,
+  .category-grid,
+  .item-grid,
+  .items-container {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .vegSection,
+  .fruitSection,
+  .flowerSection,
+  .combo-section,
+  .category-grid,
+  .item-grid,
+  .items-container {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 
 
 </style>
