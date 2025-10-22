@@ -1238,6 +1238,37 @@ function setActiveButton(btn) {
     grid-template-columns: 1fr !important;
   }
 }
+/* ✅ FINAL 2-COLUMN RESPONSIVE FIX (Works on GitHub Pages) */
+
+@media screen and (max-width: 900px) {
+  .grid,
+  #vegGrid,
+  #fruitGrid,
+  #flowerGrid,
+  #groceryGrid,
+  #bihariSnacksGrid,
+  #milkProductsGrid,
+  #panditPujaGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    justify-items: center !important;
+    align-items: start !important;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .grid,
+  #vegGrid,
+  #fruitGrid,
+  #flowerGrid,
+  #groceryGrid,
+  #bihariSnacksGrid,
+  #milkProductsGrid,
+  #panditPujaGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
 
 
 </style>
