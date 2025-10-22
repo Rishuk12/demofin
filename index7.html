@@ -1,0 +1,2584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Veg, Phool & Fruits Selector</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+ 
+
+
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="image1.png">
+  <link rel="apple-touch-icon" href="image1.png">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  
+
+  <!-- Styles -->
+  <style>
+* { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #FFF5E6;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1C482E;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .back-btn, .cart-btn, .order-btn {
+      background: #1C482E;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.04);
+    }
+
+    .card img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      max-height: 140px;
+      object-fit: cover;
+    }
+
+    .controls, .payment-options {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+
+    .controls button, .add-btn, .place-order, .location-btn {
+      background: #3C803F;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .add-btn {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .cart-popup, .orders-popup {
+      position: fixed;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+      padding: 16px;
+      z-index: 999;
+      display: none;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .cart-popup {
+      top: 60px;
+      right: 20px;
+      padding-bottom: 80px;
+    }
+
+    .orders-popup {
+      top: 70px;
+      left: 20px;
+    }
+
+    .cart-popup h2, .cart-popup h3, .orders-popup h2 {
+      color: #1C482E;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: #f9f9f9;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      gap: 12px;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .qty-info {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .item-price {
+      font-weight: bold;
+      color: #1C482E;
+      margin-top: 4px;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-left: 40px;
+    }
+
+    .qty-btn {
+      background: #3C803F;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .qty-btn:hover {
+      background: #1C482E;
+    }
+
+    .remove-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      width: 24px;
+      height: 24px;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/3096/3096673.png');
+      background-size: 20px 20px;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.2s;
+    }
+
+    .remove-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .search-section {
+  margin: 4px 0 6px 0; /* upar aur neeche dono ka gap kam kiya */
+  text-align: center;
+}
+
+    .search-section input {
+      width: 90%;
+      max-width: 500px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .section-divider {
+      height: 4px;
+      background: linear-gradient(to right, #1C482E, #3C803F, #1C482E);
+      border: none;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+
+    .success-popup {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #d4edda;
+      color: #155724;
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+      font-size: 1.2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      color: #1C482E;
+      margin: 20px 0 10px;
+      scroll-margin-top: 120px;
+    }
+
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      background-color: green;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: none;
+    }
+
+    #cart-icon {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 2000;
+}
+
+.fly-item {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: all 1s ease-in-out;
+  z-index: 3000;
+}
+
+.fly-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+}
+
+.fixed-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #fff;
+  padding: 10px 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  border-radius: 0 0 18px 18px;
+  text-align: center;
+}
+
+/* Top bar flex */
+.fixed-header .top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Buttons (Back, Cart, Orders) */
+.fixed-header .back-btn,
+.fixed-header .cart-btn,
+.fixed-header .order-btn {
+  background: #184c2e;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+  transition: transform 0.2s;
+}
+
+.fixed-header .back-btn:hover,
+.fixed-header .cart-btn:hover,
+.fixed-header .order-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Search Bar */
+.fixed-header .search-section input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 0.95rem;
+  box-shadow: inset 2px 2px 6px rgba(0,0,0,0.15),
+              inset -2px -2px 6px rgba(255,255,255,0.9);
+}
+/* 🔹 Compact search + category spacing */
+.search-section {
+  margin: 0 0 4px 0;   /* neeche ka gap kam */
+  padding: 0;          /* extra inner spacing remove */
+}
+.category-bar {
+  margin-top: 0;       /* bilkul chipka hua look */
+}
+.search-section,
+.category-bar {
+  display: block;
+  line-height: 1;
+}
+
+
+/* Divider */
+.section-divider {
+  border: none;
+  height: 3px;
+  background: linear-gradient(90deg, #184c2e, #4caf50, #184c2e);
+  margin: 10px 0;
+  border-radius: 2px;
+}
+
+/* Heading */
+.fixed-header h1 {
+  color: #1c4c2e;
+  font-size: 1.3rem;
+  margin: 6px 0;
+  font-weight: 700;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Scrollable Content */
+.scroll-content {
+  margin-top: 12px;
+  padding-bottom: 20px;
+}
+
+.category-bar {
+  display: flex;
+  justify-content: space-around;
+  margin: 2px 0;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.category-bar button {
+  flex: 1;
+  min-width: 100px;
+  background: #184c2e;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+  transition: transform 0.2s, background 0.3s;
+}
+
+.category-bar button:hover {
+  transform: scale(1.05);
+  background: #2e7d32;
+}
+.category-bar button.active {
+  background: orange;
+  color: white;
+  font-weight: bold;
+  transform: scale(1.05);
+}
+
+/* Base footer styles */
+.footer {
+    background: #1b1b1b;
+    color: #fff;
+    padding: 40px 20px 20px 20px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.footer-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.footer h2, .footer h3 {
+    margin-bottom: 15px;
+}
+
+.footer a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer a:hover {
+    color: #ffae42;
+}
+
+.footer ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer ul li {
+    margin-bottom: 10px;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 30px;
+    border-top: 1px solid #444;
+    padding-top: 15px;
+    font-size: 14px;
+}
+
+/* Responsive 3D mobile-friendly footer */
+@media screen and (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .footer-brand, 
+    .footer-nav, 
+    .footer-contact, 
+    .footer-social {
+        width: 90%;
+        max-width: 400px;
+        background: #2a2a2a;       /* dark card background */
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4); /* 3D effect */
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    /* Touch-friendly highlight effect */
+    .footer-brand:active, 
+    .footer-nav:active, 
+    .footer-contact:active, 
+    .footer-social:active {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    .footer-nav ul {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-nav ul li {
+        margin: 10px 0;
+    }
+
+    .footer a {
+        font-weight: 500;
+    }
+
+    .footer a:hover, .footer a:active {
+        color: #ffae42;
+    }
+
+    .footer-bottom {
+        font-size: 13px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #444;
+    }
+}
+
+.checkout-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: orange;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+.checkout-btn:hover {
+  background: darkorange;
+}
+
+
+/* 🔹 My Orders responsive design */
+.order-entry {
+  overflow-x: auto;
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom: 15px;
+  border-left: 6px solid #28a745;
+}
+
+/* Table default */
+.order-entry table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 450px; /* desktop ke liye */
+}
+
+.order-entry th,
+.order-entry td {
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+/* Mobile responsive */
+@media screen and (max-width: 600px) {
+  .order-entry {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .order-entry table {
+    font-size: 12px;
+    min-width: 380px; /* thoda compact */
+  }
+
+  .order-entry th,
+  .order-entry td {
+    padding: 4px;
+  }
+
+  .order-entry button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  /* Address wrapping */
+  .order-entry p {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+}
+
+.reward-tracker {
+  margin: 15px;
+  text-align: center;
+  font-weight: bold;
+  color: #1C482E;
+}
+.progress-bar {
+  width: 100%;
+  height: 14px;
+  background: #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4caf50, #81c784);
+  transition: width 0.5s ease;
+}
+/* 🎤 Mic button (category bar me) */
+.category-bar .mic-btn {
+  background: linear-gradient(90deg, #007BFF, #0056b3);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+  transition: transform 0.2s, background 0.3s;
+}
+
+.category-bar .mic-btn:hover {
+  background: linear-gradient(90deg, #0056b3, #007BFF);
+  transform: scale(1.05);
+}
+
+
+
+/* ✅ Orders Popup Responsive */
+#ordersPopup {
+  width: 90%;
+  max-width: 600px;
+  height: auto;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 12px;
+}
+
+#ordersPopup table {
+  width: 100%;
+  font-size: 14px;
+  border-collapse: collapse;
+}
+
+#ordersPopup th, #ordersPopup td {
+  padding: 6px;
+  text-align: center;
+}
+
+/* ✅ Mobile ke liye */
+@media (max-width: 600px) {
+  #ordersPopup {
+    width: 95%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  #ordersPopup table {
+    font-size: 12px;
+    min-width: 100%;
+  }
+
+  #ordersPopup th, #ordersPopup td {
+    padding: 4px;
+  }
+}
+
+/* Delivery Address Form */
+.address-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  margin: 12px 0;
+}
+
+.address-form input,
+.address-form select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.address-form input:focus,
+.address-form select:focus {
+  border-color: #1C482E;
+  box-shadow: 0 0 6px rgba(28,72,46,0.3);
+}
+
+/* Buttons inside address */
+.address-form .location-btn {
+  background: linear-gradient(90deg, #1C482E, #3C803F);
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.address-form .location-btn:hover {
+  background: linear-gradient(90deg, #3C803F, #1C482E);
+  transform: scale(1.03);
+}
+
+/* Cart Popup - mobile friendly */
+.cart-popup {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  right: auto;
+  width: 90%;
+  max-width: 450px;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+/* Full screen on small devices */
+@media (max-width: 600px) {
+  .cart-popup {
+    width: 95%;
+    height: 95vh;
+    overflow-y: auto;
+    border-radius: 18px;
+  }
+}
+
+/* 🔹 Global Back Button (Fixed Bottom Left) */
+#globalBackBtn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: linear-gradient(90deg, #1C482E, #3C803F);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 5000; /* हमेशा ऊपर */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background 0.3s;
+}
+
+#globalBackBtn:hover {
+  background: linear-gradient(90deg, #3C803F, #1C482E);
+  transform: scale(1.05);
+}
+
+/* Contact Me button (Top bar me) */
+.contact-btn {
+  background: linear-gradient(90deg, #007BFF, #0056b3); /* Aqua/Blue scheme */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  transition: transform 0.2s, background 0.3s;
+}
+
+.contact-btn:hover {
+  background: linear-gradient(90deg, #0056b3, #007BFF);
+  transform: scale(1.05);
+}
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.top-bar button {
+  flex: 1;                /* sab equal width le */
+  min-width: 100px;       /* chhota screen pe squeeze na ho */
+  text-align: center;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  border-radius: 10px;
+}
+@media (max-width: 600px) {
+  .top-bar {
+    gap: 6px;
+  }
+  .top-bar button {
+    font-size: 0.8rem;
+    padding: 6px 8px;
+  }
+}
+
+@keyframes zoomIn {
+  from { transform:scale(0.8); opacity:0; }
+  to   { transform:scale(1); opacity:1; }
+}
+
+/* 🔍 Image Zoom Popup */
+.zoom-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.zoom-popup img {
+  max-width: 90%;
+  max-height: 80%;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(255,255,255,0.2);
+  animation: zoomIn 0.3s ease-in-out;
+}
+
+.close-zoom {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  user-select: none;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.order-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  color: green;
+  position: relative;
+  margin: 20px 0;
+}
+
+.order-title::before,
+.order-title::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 40%;   /* दोनों तरफ equal line */
+  height: 2px;
+  background: green;
+}
+
+.order-title::before {
+  left: 0;
+}
+
+.order-title::after {
+  right: 0;
+}
+
+/* 🌸 Soft Elegant Divider – Final Version */
+.section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 60px auto;
+  width: 90%;
+  position: relative;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #9acd32, transparent);
+}
+
+.section-divider span {
+  margin: 0 15px;
+  padding: 10px 25px;
+  border-radius: 30px;
+  background: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2e7d32;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.07);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* hover par halka smooth animation */
+.section-divider span:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 12px rgba(46, 125, 50, 0.2);
+}
+
+/* mobile ke liye responsive text */
+@media (max-width: 600px) {
+  .section-divider span {
+    font-size: 1rem;
+    padding: 8px 15px;
+  }
+}
+/* ✨ Shimmer Animated Divider */
+.reward-divider {
+  position: relative;
+  width: 60%;
+  height: 2px;
+  margin: 6px auto 8px;
+  background: linear-gradient(90deg, transparent, #1C482E, transparent);
+  border: none;
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0.7;
+}
+
+/* Moving shimmer light */
+.reward-divider::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(67, 160, 71, 0.6), transparent);
+  animation: shimmerMove 3s linear infinite;
+  border-radius: 2px;
+}
+
+/* Animation keyframes */
+@keyframes shimmerMove {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+/* ✅ FINAL FIX – Search aur Category ke beech gap 0 */
+.search-section {
+  margin-bottom: 2px !important;
+  padding-bottom: 0 !important;
+}
+
+.category-bar {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+/* 🌈 Different background for each section */
+.veg-bg { background: #e8f5e9; padding: 15px; border-radius: 12px; }       /* light green */
+.fruit-bg { background: #fff3e0; padding: 15px; border-radius: 12px; }     /* light orange */
+.flower-bg { background: #fce4ec; padding: 15px; border-radius: 12px; }    /* light pink */
+.grocery-bg { background: #f3e5f5; padding: 15px; border-radius: 12px; }   /* light violet */
+.snacks-bg { background: #e0f7fa; padding: 15px; border-radius: 12px; }    /* light blue */
+.milk-bg { background: #f9fbe7; padding: 15px; border-radius: 12px; }      /* light yellow */
+.puja-bg { background: #ede7f6; padding: 15px; border-radius: 12px; }      /* soft lavender */
+
+
+/* 🌿 Compact Farm2Home top section layout */
+.header-section {
+  padding: 4px 8px !important;
+}
+
+/* Contact / Cart / My Orders buttons row */
+.top-buttons {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px !important;
+  margin-bottom: 4px !important;
+}
+
+/* Reward tracker section */
+.reward-section {
+  margin: 2px 0 !important;
+}
+.progress-container {
+  margin: 3px 0 !important;
+}
+.reward-section button {
+  margin-top: 2px !important;
+  padding: 3px 8px !important;
+  font-size: 12px !important;
+}
+
+/* Search bar */
+.search-box {
+  margin-top: 4px !important;
+  margin-bottom: 3px !important;
+}
+.search-box input {
+  height: 30px !important;
+  font-size: 13px !important;
+}
+
+/* Green separator line below search bar */
+hr, .section-divider {
+  margin-top: 3px !important;
+  margin-bottom: 4px !important;
+  height: 1px !important;
+}
+
+/* Category bar (Vegetables, Fruits, etc.) */
+.category-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px !important;
+  margin-top: 4px !important;
+  margin-bottom: 6px !important;
+}
+.category-bar button {
+  padding: 5px 10px !important;
+  font-size: 13px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Mobile optimization */
+@media (max-width: 600px) {
+  .category-bar { gap: 3px !important; }
+  .category-bar button { font-size: 12px !important; padding: 4px 8px !important; }
+  .search-box input { height: 28px !important; }
+}
+/* 🌿 Add spacing between sections */
+.veg-bg, .fruit-bg, .flower-bg,
+.grocery-bg, .snacks-bg, .milk-bg, .puja-bg {
+  margin: 25px 0;           /* 🔹 upar–neeche gap */
+  padding: 20px;            /* 🔹 andar ka space */
+  border-radius: 16px;      /* 🔹 soft corner */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 🔹 thoda 3D effect */
+  transition: transform 0.3s ease;
+}
+
+/* Hover par halka zoom feel */
+.veg-bg:hover, .fruit-bg:hover, .flower-bg:hover,
+.grocery-bg:hover, .snacks-bg:hover, .milk-bg:hover, .puja-bg:hover {
+  transform: scale(1.01);
+}
+
+
+</style>
+</head>
+
+<body>
+  
+
+ 
+
+
+ <!-- ✅ Fixed Header Section -->
+<div class="fixed-header">
+  <div class="top-bar">
+    <button class="contact-btn" onclick="scrollToFooter()">📞 Contact Me</button>
+    <div class="cart-btn" onclick="toggleCart()">🛒 Cart (<span id="cart-count">0</span>)</div>
+    <div class="order-btn" onclick="toggleOrders()">📦 My Orders</div>
+  </div>
+  <!-- Reward Tracker -->
+<div class="reward-tracker">
+  <div class="progress-text" id="progressText">0 / 21 Orders Completed</div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <button onclick="showRewardRules()" class="location-btn">📖 Reward Rules</button>
+</div>
+<hr class="reward-divider">
+
+
+<!-- Reward Rules Popup -->
+<div class="orders-popup" id="rulesPopup" style="display:none;">
+  <h2>🏆 21st Order Reward Program – Rules</h2>
+  <ul style="line-height:1.6; font-size:0.95rem;">
+    <li>Har valid order tracker me count hoga.</li>
+    <li>Valid order ke liye:
+      <ul>
+        <li>Minimum order value <b>₹200</b> ho.</li>
+        <li>Kam se kam ek <b>Vegetable ya Fruit</b> item ho.</li>
+      </ul>
+    </li>
+    <li>Same din ke chhote orders ek hi order maane jayenge.</li>
+    <li>21st valid order par:
+      <ul>
+        <li>Agar us din ka order <b>₹500+</b> hai → <b>₹250 OFF</b>.</li>
+        <li>Agar <b>₹500 se kam</b> hai → <b>₹50 OFF</b>.</li>
+      </ul>
+    </li>
+    <li>Reward apply hone ke baad tracker reset ho jayega.</li>
+  </ul>
+  <button onclick="closeRules()" class="location-btn">Close</button>
+</div>
+
+
+  <div class="search-section">
+    <input type="text" id="searchInput" placeholder="🔍 Search item name..." oninput="filterItems()" />
+  </div>
+
+  <hr class="section-divider">
+
+ <div class="category-bar">
+  <button onclick="scrollToCategory('vegSection')">🥦 Vegetables</button>
+  <button onclick="scrollToCategory('fruitSection')">🍎 Fruits</button>
+  <button onclick="scrollToCategory('flowerSection')">🌸 Puja Flowers</button>
+  <button onclick="scrollToCategory('grocerySection')">🛒 Grocery</button>
+  <button onclick="scrollToCategory('bihariSnacksSection')">Bihari Snacks</button>
+  <button onclick="scrollToCategory('milkProductsSection')">Milk Products</button>
+  <button onclick="scrollToCategory('panditPujaSection')">Swatravin Swami Puja</button>
+  <button onclick="openPujaUpload()">📂 Upload Puja List</button>
+  <!-- Invoice Image Upload -->
+
+
+ </div>
+
+</div>
+<img id="logoImg" src="avantilogo.png" style="display:none;">
+
+  <!-- Category Buttons -->
+
+<!-- 🥦 Vegetables -->
+<div id="vegSection" class="veg-bg">
+  <h2>🥦 Vegetables</h2>
+  <div id="vegGrid" class="grid"></div>
+</div>
+
+<!-- 🍎 Fruits -->
+<div id="fruitSection" class="fruit-bg">
+  <h2>🍎 Fruits</h2>
+  <div id="fruitGrid" class="grid"></div>
+</div>
+
+<!-- 🌸 Puja Flowers -->
+<div id="flowerSection" class="flower-bg">
+  <h2>🌸 Puja Flowers</h2>
+  <div id="flowerGrid" class="grid"></div>
+</div>
+
+<!-- 🛒 Grocery -->
+<section id="grocerySection" class="grocery-bg">
+  <h2>🛒 Grocery</h2>
+  <div id="groceryGrid" class="grid"></div>
+</section>
+
+<!-- 🍘 Bihari Snacks -->
+<section id="bihariSnacksSection" class="snacks-bg">
+  <h2>🍘 Authentic Bihari Snacks</h2>
+  <div id="bihariSnacksGrid" class="grid"></div>
+</section>
+
+<!-- 🥛 Milk Products -->
+<section id="milkProductsSection" class="milk-bg">
+  <h2>🥛 Fresh Milk & Dairy Products</h2>
+  <div id="milkProductsGrid" class="grid"></div>
+</section>
+
+<!-- 🕉️ Swatravin Swami Puja -->
+<section id="panditPujaSection" class="puja-bg">
+  <h2>🕉️ Swatravin Swami Puja Sewa</h2>
+  <div id="panditPujaGrid" class="grid"></div>
+</section>
+
+
+
+
+
+
+
+
+  <div class="cart-popup" id="cartPopup">
+    <h2>Your Cart</h2>
+    <div id="cartItems"></div>
+    <p><strong>Total: ₹<span id="cartTotal">0</span></strong></p>
+
+    <h3>Delivery Address</h3>
+     <div class="address-form">
+       <input placeholder="Full Name" id="fullName" />
+       <input placeholder="Mobile Number" id="mobile" />
+       <input placeholder="Full Address " id="address" />
+       <button type="button" class="location-btn" onclick="detectLocation()">📍 Use My Current Location</button>
+       <button type="button" class="location-btn" onclick="shareFullDetailsOnWhatsApp()">📲 Share Full Details on WhatsApp</button>
+
+    
+
+   
+
+
+
+       <select id="state" onchange="loadDistricts()">
+         <option value="">select State</option>
+       </select>
+
+       <select id="district" onchange="loadPincodes()">
+         <option value="">select District</option>
+       </select>
+
+       <select id="pin">
+         <option value="">select PinCode </option>
+       </select>
+
+       <input placeholder="Area / Locality / Colony Name" id="area" />
+       <input placeholder="Landmark /Building / Apartment Name" id="landmark" />
+       
+      </div>
+    <h3>Select Time Slot</h3>
+    <select id="timeSlot">
+      <option value="6-8 AM">6–8 AM</option>
+      <option value="8-10 AM">8–10 AM</option>
+      <option value="10-12 PM">10–12 PM</option>
+      <option value="4-6 PM">4–6 PM</option>
+    </select>
+
+    <h3>Payment Method</h3>
+    <div class="payment-options">
+      <label><input type="radio" name="payment" value="COD" checked /> Cash on Delivery</label>
+      <label><input type="radio" name="payment" value="UPI" /> UPI (Coming Soon)</label>
+    </div>
+
+    <button class="place-order" onclick="placeOrder()">Place Order</button>
+  </div>
+
+  <div class="orders-popup" id="ordersPopup">
+    <h2>My Orders</h2>
+    <div id="orderHistoryList"></div>
+  
+  </div>
+  <div class="success-popup" id="successPopup">🎉 Order Placed Successfully!</div>
+  <!-- 🔍 Image Zoom Popup -->
+<div id="imageZoomPopup" class="zoom-popup" style="display:none;">
+  <span class="close-zoom" onclick="closeZoom()">&times;</span>
+  <img id="zoomedImage" src="" alt="Zoomed Image">
+</div> 
+
+<script>
+
+const serviceableAreas = [
+  {
+    state: "Bihar",
+    district: [
+      {
+        name: "Patna",
+        pincodes: ["800001", "800014", "800020", "804453", "800026", "800016"]
+      },
+      {
+        name: "Nalanda",
+        pincodes: [
+          {
+            code: "803110",
+            villages: [
+              { name: "Abu Mohammadpur", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Alipu", wards: ["Ward 1", "Ward 2"] },
+              { name: "Amar", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Az Rakbe Sirsi", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Bafniwan", wards: ["Ward 1", "Ward 2"] },
+              { name: "Bama Chak", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Barah", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Basniyawan", wards: ["Ward 1", "Ward 2"] },
+              { name: "Berhna", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Bheria", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Bhojpur", wards: ["Ward 1", "Ward 2"] },
+              { name: "Birampur", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Chak Akmal", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Chak Hanifa", wards: ["Ward 1", "Ward 2"] },
+              { name: "Chak Rashid", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Chaunghar", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Chauria", wards: ["Ward 1", "Ward 2"] },
+              { name: "Cheran", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Chero", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Chhatiana", wards: ["Ward 1", "Ward 2"] },
+              { name: "Chhiddi", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Daili", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Dehra", wards: ["Ward 1", "Ward 2"] },
+              { name: "Dihri", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Gonawan", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Goshain Bigh", wards: ["Ward 1", "Ward 2"] },
+              { name: "Haspura", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Jagatpur", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Jiwanpur", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Kharthua", wards: ["Ward 1", "Ward 2"] },
+              { name: "Kolawan", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Lohara", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Mahmudpur", wards: ["Ward 1", "Ward 2"] },
+              { name: "Mai", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Manikpur", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Mirdaha Chak", wards: ["Ward 1", "Ward 2"] },
+              { name: "Mobarakpur", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Mohammadpur Dhimoe", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Moratalao", wards: ["Ward 1", "Ward 2"] },
+              { name: "Mustafapur", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Narchawar", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Nazimnagar", wards: ["Ward 1", "Ward 2"] },
+              { name: "Nehusa", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Pachaura", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Poari", wards: ["Ward 1", "Ward 2"] },
+              { name: "Rampur", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Sabnahuar", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Sirsi", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Surhar", wards: ["Ward 1", "Ward 2"] },
+              { name: "Tar Bigha", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Telmar", wards: ["Ward 1", "Ward 2", "Ward 3"] },
+              { name: "Tira", wards: ["Ward 1", "Ward 2"] },
+              
+             
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    state: "J&K",
+    district: [
+      { name: "Srinagar", pincodes: ["190006", "190023"] }
+    ]
+  },
+  {
+    state: "UP (Uttar Pradesh)",
+    district: [
+      { name: "Lucknow", pincodes: ["226010", "226016"] }
+    ]
+  },
+  {
+    state: "Maharashtra",
+    district: [
+      { name: "Pune", pincodes: ["411045", "411057", "411014", "411011"] }
+    ]
+  }
+];
+
+  
+
+const items = [
+      { name: "Red Potato (Aloo)", price:12, img: "https://media.istockphoto.com/id/155231888/photo/potatoes.jpg?s=612x612&w=0&k=20&c=wzcLLI5sS7U9qafpsTdlFK0jUV3SI-A8chmNBwXKRkc=", type:"veg" },
+      { name: "White Potato (Aloo)", price:14, img: "https://media.istockphoto.com/id/479903950/photo/new-potato-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=Npy46xC15Vipx35PDek1Xh3gW3VsI8HWieHEES4HLNY=", type:"veg" },
+      {name: "cow dung", price: 5, img: "https://media.istockphoto.com/id/1738805853/photo/dry-cow-excrement-isolated-close-top-view.jpg?s=612x612&w=0&k=20&c=KxbPoOWbHkT43HjthPYPWibRaLoZtPXyBqy0n8GFIPY=", type: "phool" },
+      { name: "Pyaaz (Onion)", price:15, img: "https://media.istockphoto.com/id/1162478937/photo/small-red-onion-on-for-boarding-much-pommels.webp?a=1&b=1&s=612x612&w=0&k=20&c=LPEGVz2fmXuVjh-_gsL7-NyQHoAW654J1ihwZOzm06s=", type:"veg" },
+      { name: "Tamatar (Tomato)", price:20, img: "https://media.istockphoto.com/id/831570242/photo/three-juicy-red-tomatoes-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=bBrjZsWY4eg90OpA2S6cO3psGR1TFx8f4L0HAmIQqm4=", type:"veg" },
+      { name: "desi Lauki (Bottle Gourd)",price:20, img: "https://media.istockphoto.com/id/1481121489/photo/bottle-gourd.jpg?s=612x612&w=0&k=20&c=at9YKjIS2pc94LdTmioVBGO6-W69i_C5L20C55eb3qg=",type:"veg" },
+      { name: "Lauki (Bottle Gourd)",price:15, img: "https://t3.ftcdn.net/jpg/14/53/60/08/240_F_1453600875_GkLuttbcpgmtSyBxtxB5tOeNv85Rhqdk.jpg",type:"veg" },
+      { name: "Tori (Ridge Gourd)",price:15, img: "https://media.istockphoto.com/id/490025896/photo/fresh-loofah.jpg?s=612x612&w=0&k=20&c=yypocElDvpX16k7kDE0EUjyC7z_uZltvBP8uQU_9iMc=",type:"veg" },
+      { name: "Bhindi (Lady Finger)",price:20, img: "https://media.istockphoto.com/id/2149005541/photo/fresh-green-okra-isolated-on-white-background-healthy-vegetables.jpg?s=612x612&w=0&k=20&c=zWTwhCkPrusDH_zo-ZppKQOZCV34Wsegb14_uvHotBU=" ,type:"veg"},
+      { name: "Baingan - Long",price:20, img: "https://media.istockphoto.com/id/486633634/photo/large-eggplant-on-white-background.jpg?s=612x612&w=0&k=20&c=ohM7jIL33o76GEtlU2Uol_9NhtxL-1IZD5h1ZFA0FSI=",type:"veg" },
+      { name: "Baingan - Round",price:20, img: "https://media.istockphoto.com/id/1186292631/photo/original-shape-eggplant-fruit-on-a-white-background.jpg?s=612x612&w=0&k=20&c=i4m-pBlYMJKOLyMDZm8lDWwnq0XLTf6TNRrwTI-SN3c=",type:"veg" },
+      { name: "Baingan - round",price:20, img: "https://media.istockphoto.com/id/1253741876/photo/eggplant-or-aubergine-vegetable-on-white-background.jpg?s=612x612&w=0&k=20&c=-LWaw663UvH6IHgCyd0svv_akxAkYJB-DeC-lVA77H0=" ,type:"veg"},
+      { name: "Baingan - green",price:20, img: "https://media.istockphoto.com/id/471674583/photo/eggplant.jpg?s=612x612&w=0&k=20&c=fD8Wt1kpy62WZZpkAzDTvGP1AHqCqFZPhVuKZen9H20=",type:"veg" },
+      { name: "Desi Elephant Foot Yam (देशी सूरन )",price:30, img:"https://t3.ftcdn.net/jpg/00/78/51/58/240_F_78515875_KhsvvihpdV8VxlNb2cjIfZD7Y49s30SD.jpg",type:"veg" },
+      { name: "Elephant Foot Yam (सूरन )",price:20, img: "https://t4.ftcdn.net/jpg/04/24/38/71/240_F_424387119_n2UHIRWa9DoZ093YAtz5lLJcwqUWPhh2.jpg",type:"veg" },
+      { name: "Drumstick (सहजन / सोझन)",price:30, img: "https://t3.ftcdn.net/jpg/05/85/66/68/240_F_585666841_9PNi8WG6rn45vYLY54YZGvxLblBVkAvh.jpg",type:"veg" },
+      { name: "Shimla Mirch (Capsicum)",price:30, img: "https://media.istockphoto.com/id/1089613296/photo/indian-green-peppers.jpg?s=612x612&w=0&k=20&c=-wXlLtGIHGno3bXChePGp0o4N33e6j4pYERpzClrZdI=" ,type:"veg"},
+      { name: "Shimla Mirch (Capsicum)",price:30, img: "https://media.istockphoto.com/id/628582556/photo/red-bell-pepper.jpg?s=612x612&w=0&k=20&c=fJfVoIiAR0GcuDpbqsTNJNZpV7snvfeLtXCWdKGRtXU=",type:"veg" },
+      { name: "Shimla Mirch (Capsicum)",price:30, img: "https://media.istockphoto.com/id/925190112/photo/yellow-bell-peppers-on-white-background.jpg?s=612x612&w=0&k=20&c=LZVSDPOMGPg3PScLfp0CgdIwfPCRcfhdcSuN4cJOY38=",type:"veg" },
+      { name: "Karela (Bitter Gourd)",price:30, img: "https://media.istockphoto.com/id/1266443111/photo/bitter-melon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=vthnH1hZUjPZNBgQN4QdgJWC_VfoZJP_cbNy37MmohU=",type:"veg" },
+      { name: "Patta Gobhi (Cabbage)",price:20, img: "https://media.istockphoto.com/id/183893293/photo/cabbage.jpg?s=612x612&w=0&k=20&c=BwSxCJCGQYLhGacneRl_0LfL-rB4qrWpyQASPrhFCSA=",type:"veg" },
+      { name: "Phool Gobhi (Cauliflower)",price:10, img: "https://media.istockphoto.com/id/172868533/photo/a-cauliflower-with-foliage-isolated-on-a-white-background.jpg?s=612x612&w=0&k=20&c=Gq5DdoIaUNQ1tT5zG41Ex1Eq03c6sN_HduTVpA6VNB8=",type:"veg" },
+      { name: "Matar (Green Peas)",price:30, img: "https://media.istockphoto.com/id/155431404/photo/green-pea.jpg?s=612x612&w=0&k=20&c=loFtZjD50IXlUuwXS11ovxLLu-ZxyySyR88GoPccnq4=" ,type:"veg"},
+      { name: "Gajar (orange Carrot)",price:25, img: "https://media.istockphoto.com/id/619252960/photo/carrot.jpg?s=612x612&w=0&k=20&c=C-PlZ2oHW2SDCkaZXn8rg1UFdeF5ismwiy3v7uQRVKE=",type:"veg" },
+      { name: "gajar(red carrot)",price:25, img: "https://media.istockphoto.com/id/1448517342/photo/fresh-vegetable-carrots-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=P7DeYtTDIw0EMzqMLZo_c3L7QbFULw2ug_DWJf04wvk=",type:"veg" },
+      { name: "Chukandar (Beetroot)",price:40, img: "https://media.istockphoto.com/id/2153935146/photo/red-beetroot-on-stem-with-green-leaves-and-beet-cross-section-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=-jadYwVUlFFJ13CNwcTK4jSgCT1tb7Bf_Wt9BbsXTpc=" ,type:"veg"},
+      { name: "Methi (Fenugreek)",price:12, img: "https://media.istockphoto.com/id/494568564/photo/fresh-green-fenugreek-leaves-on-white-background.jpg?s=612x612&w=0&k=20&c=PXoW0zaeCGgAP1w7RqJvsHiqDIcfImbdu-s7rfo0Rik=",type:"veg" },
+      { name: "Palak (Spinach)",price:10, img: "https://media.istockphoto.com/id/1006196472/photo/bunch-of-spinach-leaves-on-isolated-white-background.jpg?s=612x612&w=0&k=20&c=OAIswtUC1aMNDwtMEFIaZv6fSIftsoAV-cgJZSGLJ7A=" ,type:"veg"},
+      { name: "Sarson (Mustard Leaves)",price:10, img: "https://media.istockphoto.com/id/1298820852/photo/sarson-leaves-saag-of-brown-or-chinese-black-mustard-rai-raya-or-raai-also-known-as-brassica.jpg?s=612x612&w=0&k=20&c=coHjV9xRwh56RhNhQD0ou9BOX8ZTBS_aVLSdcHr9E4Y=",type:"veg" },
+      { name: "Kathal (Jackfruit)",price:30, img: "https://media.istockphoto.com/id/1490812553/photo/closeup-jackfruit-with-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=PYvmzXYuEKpK0C8OeH-NOECdNn-6AK3Xi3pFvwdlIrI=",type:"veg" },
+      { name: "Parwal (Pointed Gourd)",price:25, img: "https://media.istockphoto.com/id/179239559/photo/pointed-gourd-or-potol.jpg?s=612x612&w=0&k=20&c=gPiUoxNUsQPZjro_GTAr7P2JOxlnKKVgCr1fBgRiQ7s=" ,type:"veg"},
+      { name: "Shalgam (Turnip)",price:30, img: "https://media.istockphoto.com/id/1465228611/photo/kohlrabi-vegetable.jpg?s=612x612&w=0&k=20&c=5ldmtsHV3RiT746LyK2nBxy2j1WJ9OYsSWjVIuwTENw=",type:"veg" },
+      { name: "Mooli (Radish)",price:30, img: "https://media.istockphoto.com/id/91608070/photo/large-japanese-daikon-radish-or-mooli.jpg?s=612x612&w=0&k=20&c=3lFr6V-JZ9idnw9H5CwB_CDXBsS-QPN57ttCKU114WQ=",type:"veg" },
+      { name: "Spring Onion",price:30, img: "https://media.istockphoto.com/id/145122488/photo/a-bunch-of-fresh-spring-onions.jpg?s=612x612&w=0&k=20&c=-5dn2HmcPYbsNuHKH9ne4Es_Tm_CsGrMFIAVBLDBCDo=",type:"veg" },
+      { name: "Sweet Corn",price:20, img: "https://media.istockphoto.com/id/841408966/photo/corn-on-the-cob-kernels-peeled-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=v76mGkmlRYhLo98AMVQbpCpYwDc-1OGv7pI96aHc8zA=",type:"veg" },
+      { name: "French Beans",price:25, img: "https://media.istockphoto.com/id/140236373/photo/portion-of-uncooked-green-french-beans.jpg?s=612x612&w=0&k=20&c=tGhxoV_eu72htyKDZk1ECFHi1eZJVi33hZ_qDjKnywA=",type:"veg" },
+      { name: "Nimbu (Lemon)",price:50, img: "https://media.istockphoto.com/id/2154842083/photo/close-up-of-a-sliced-fresh-green-organic-lemon.jpg?s=612x612&w=0&k=20&c=bZ_h399knoJFr7FeBDlKEUpOqbVMngeeMH0cLOkAl78=",type:"veg" },
+      { name: "Dhania (Coriander)",price:15, img: "https://media.istockphoto.com/id/155098529/photo/coriander.jpg?s=612x612&w=0&k=20&c=kqN-POfQsSdJITqUisNqdo7EIi1I5dmzjm3ncAuweLw=",type:"veg" },
+      { name: "Hari Mirch (Green Chilli)",price:30, img: "https://media.istockphoto.com/id/1394737507/photo/green-hot-chili-peppers-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=8WPSxHchpOtdfWi3N35OrP6_3OPuThEKND0nUyT9apg=",type:"veg" },
+      { name: "deshi Kheera (Cucumber)",price:40, img: "https://media.istockphoto.com/id/171321660/photo/gherkin-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=G_W39fNvKTKorp-838TIxJlb4Qs_EPwyT_vQjZLt_cA=" ,type:"veg"},
+      { name: "kheera (cucumber)",price:15, img: "https://media.istockphoto.com/id/967491012/photo/whole-with-slice-cucumber-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=Kmeq5UlXegj7sQEGicTWbxqngB3j57JZBmOM-P_nTwU=",type:"veg" },
+      { name: "Zucchini",price:12, img: "https://media.istockphoto.com/id/471152113/photo/two-courgettes-stacked-with-three-slices-beside-them.jpg?s=612x612&w=0&k=20&c=uOAwaRXLtohHdJH97HW7AhsIIdzPiD6s_ZMlWbMDJY8=",type:"veg"  },
+      { name: "Broccoli",price:40, img: "https://media.istockphoto.com/id/183300149/photo/broccoli.jpg?s=612x612&w=0&k=20&c=ryP5FrMKK8ejTMX04iMUVpOTyfL_Sgb2fYmeQzKQeng=" ,type:"veg"},
+      { name: "Mushroom",price:60, img: "https://media.istockphoto.com/id/185326568/photo/crimini-mushrooms-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=FeK7mI_C-VqtxsCNU7wIjxnAM24SbpR-HHRCSxXEEFE=",type:"veg" },
+      { name: "Kaddu (Pumpkin)",price:40, img: "https://media.istockphoto.com/id/869083884/photo/nutmeg-pumpkin-isolated-on-white.jpg?s=612x612&w=0&k=20&c=OTkl_rkJfJWXBqSfrbkpEoMNonCNHBwAEqv8ub8dl9I=" ,type:"veg"},
+      { name: "Kachha Kela (Raw Banana)",price:30, img: "https://media.istockphoto.com/id/183771746/photo/unripe-bananas.jpg?s=612x612&w=0&k=20&c=i1i4RkW4NpM8iARlEJtlvIuZQLG_zFuzOV9Iem2q3sQ=",type:"veg" },
+      { name: "Pudina (Mint Leaves)",price:30, img: "https://media.istockphoto.com/id/1414441955/photo/mint-leaves-on-white-background.jpg?s=612x612&w=0&k=20&c=K5yxI_Cgph40fYK5ks7ZmTuOvADDDPHD7deXjbIJsco=",type:"veg" },
+      { name: "Curry Patta",price:15, img: "https://media.istockphoto.com/id/858326874/photo/curry-leaf.jpg?s=612x612&w=0&k=20&c=XPhZiCUwPK5UGYzsTXu0CpCA9KPSNLEQ2gE50Mh_zjI=",type:"veg" },
+      { name: "Lahsun (Garlic)",price:60, img: "https://media.istockphoto.com/id/2058002828/photo/garlic-bulb-and-clove-isolated-garlic-bulbs-with-cloves-on-white-background-white-garlic-bulb.jpg?s=612x612&w=0&k=20&c=QmHcpqB2c5T_av195UeI8d0InVpXwLuoiHoccwaHZkE=",type:"veg" },
+      { name: "Adrak (Ginger)",price:60, img: "https://media.istockphoto.com/id/1269132686/photo/fresh-ginger-roots-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=tWC9FBjPycX-cRQby2NuQBuXS-wU2GUrKuafmRLqEXI=" ,type:"veg"},
+      { name: "Kaccha Aam (Raw Mango)",price:20, img: "https://media.istockphoto.com/id/178075595/photo/fresh-green-mango.jpg?s=612x612&w=0&k=20&c=UxNX8FA07zUA0w9y0JiCxFGhj57Am8n4lBeZc67Xs8U=" ,type:"veg"},
+      
+
+      { name: "Banana", price: 30, img: "https://media.istockphoto.com/id/636739634/photo/banana.jpg?s=612x612&w=0&k=20&c=pO0985tQi1LpWRlWqpRvbab8S5yxgnEOVcs5CHIlcDE=", type: "fruit" },
+      { name: "Kinnaur Apple ", price: 40, img: "https://media.istockphoto.com/id/1141708425/photo/red-apples.jpg?s=612x612&w=0&k=20&c=tAlaTEx0l-dhxB4ETtIozc8B8bOhP0kDbGzVOKqGmEw=", type: "fruit" },
+      { name: "kashmari Apple", price: 60, img: "https://media.istockphoto.com/id/121274214/photo/best-red-apple.jpg?s=612x612&w=0&k=20&c=8iKCYqajHYLFkyzDWHY1n0ut70hIHQQHfvQNBEFw8ls=", type: "fruit" },
+     /// { name: "Malda Mango(मालदा) ", price: 40, img: "https://media.istockphoto.com/id/489984262/photo/mango-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=nZcYj_qP54dat2mFd4MG7N7bXVarODljdiJpmqXEbKk=", type: "fruit" },
+      { name: "Zardalu (ज़र्दालू) –", price: 30, img: "https://media.istockphoto.com/id/1419305183/photo/mango-fruit.jpg?s=612x612&w=0&k=20&c=D4r68Mm0A_a2MA8a0OGt2D60kUjTH0Ooq_LhcUO70zw=", type: "fruit" },
+      { name: "Bombaiya (बंबईया)", price: 25, img: "https://media.istockphoto.com/id/533007379/photo/green-mango-isolated-on-a-white-background.jpg?s=612x612&w=0&k=20&c=rxh3_8m0ILdGGwlZYkShq69GW8JT1PAjL9dB6_nLzNI=", type: "fruit" },
+      { name: "Papaya (पपीता)", price: 30, img: "https://media.istockphoto.com/id/864053288/photo/whole-and-half-of-ripe-papaya-fruit-with-seeds-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=hJ5DpNTt0oKjZMIHYV6gUHTntB2zIs_78dPKiuDUXgE=", type: "fruit" },
+      { name: "Red Guava", price: 30, img: "https://media.istockphoto.com/id/1221000031/photo/isolated-pink-guava-fruits.jpg?s=612x612&w=0&k=20&c=tsGe2s8yuH6uEYeXFpg9m-gB5d70jvtUclP9g-px1kQ=", type: "fruit" },
+      { name: "White Guava", price: 35, img: "https://media.istockphoto.com/id/1449307851/photo/fresh-guava-fruit-with-green-leaf-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=Irlwwp1THrQAc6_TDRRZJXaVdB0bdmo6o8b3D7yZg80=", type: "fruit" },
+      { name: "Watermelon (तरबूज)", price: 20, img: "https://media.istockphoto.com/id/1321448019/photo/ripe-juicy-watermelon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=Ev7glJxdFDqd-qIrpZDRCcp2QOVd4v0UmiblsYccNUo=", type: "fruit" },
+      { name: "Watermelon (तरबूज)", price: 20, img: "https://media.istockphoto.com/id/2205649393/photo/watermelon-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=yNmLArzlPb1min_FeQTXzu-jO0jv_64_aIbO_2dOJhc=", type: "fruit" },
+      { name: "Muskmelon (खरबूजा)", price: 25, img: "https://media.istockphoto.com/id/910127132/photo/cantaloupe-melon.jpg?s=612x612&w=0&k=20&c=6ZEbJTksIL7xwwLyop99fhhxCQK8-f368GrUjlECfkw=", type: "fruit" },
+      { name: "Orange (संतरा) ", price: 25, img: "https://media.istockphoto.com/id/172146497/photo/one-single-tangerine-isolated-on-a-white-background.jpg?s=612x612&w=0&k=20&c=YXkl4RcuZq4dhHyq5tm2RjpmKpw6zLpPLE9fUdkw0io=", type: "fruit" },
+      { name: "Mosambi (मौसमी)", price: 25, img: "https://media.istockphoto.com/id/854796764/photo/tangerine-fruit-in-white-scene.jpg?s=612x612&w=0&k=20&c=gv6y9k5uVAo91le3I73pb4TRU56mHnQX7auRFZrHyx4=", type: "fruit" },
+      { name: "Pomegranate (अनार)", price: 40, img: "https://media.istockphoto.com/id/170110715/photo/pomegranate.jpg?s=612x612&w=0&k=20&c=_GorcNvK9aFgGcRTApw3Zs2lfcQBS1ujjsLsU5sDSTI=", type: "fruit" },
+      { name: "Coconut (नारियल) ", price: 30, img: "https://media.istockphoto.com/id/1291208071/photo/green-young-coconut-isolated-on-white.jpg?s=612x612&w=0&k=20&c=9pCc0nHEtURSdIzARZBTEbhdPCLsfUgoWBkKmqvMM3E=", type: "phool" },
+      { name: "Pear (नाशपाती)", price: 40, img: "https://t3.ftcdn.net/jpg/13/85/12/96/240_F_1385129643_TqPqQzn3MZFqAuH6N2cDHnOiLVfVxTpV.jpg", type: "fruit" },
+      { name: "Green Grapes (हरे अंगूर)", price: 60, img: "https://media.istockphoto.com/id/475058135/photo/fresh-green-grapes-with-drops-isolated-on-white.jpg?s=612x612&w=0&k=20&c=JZ36ALLNOfGU3Y_ye911mImKjkyWlLIs83770kuFsik=", type: "fruit" },
+      { name: "Red Grapes (लाल अंगूर)", price: 60, img: "https://media.istockphoto.com/id/173903426/photo/red-grapes-on-the-vine-on-a-white-background.jpg?s=612x612&w=0&k=20&c=ym3GJUXVm2XskP1eYWqQnxaxMDQuzGsLiF8Tycccegw=", type: "fruit" },
+      { name: "Black Grapes (काले अंगूर)", price: 60, img: "https://media.istockphoto.com/id/502125050/photo/purple-grape-with-green-leaf.jpg?s=612x612&w=0&k=20&c=b6auFCui99MFrR4J8tZHkgtjA3tFYJyiwfduVAkaX1U=", type: "fruit" },
+      { name: "Custard Apple (सीताफल)", price: 30, img: "https://media.istockphoto.com/id/1501751612/photo/sugar-apple-or-custard-apple-green-leaf-isolated-on-white-background-healthy-fruit.jpg?s=612x612&w=0&k=20&c=oemsGYnE4npWbOoHHl6WMIX015BNXEpMiYXsZaPu9JY=", type: "fruit" },
+      { name: "kiwi", price: 150, img: "https://media.istockphoto.com/id/186858235/photo/kiwifruit.jpg?s=612x612&w=0&k=20&c=q21AIUK2hxqjLh1GSxAYhYGT9y_NFY2-_00O4E7bfmI=", type: "fruit" },
+      { name: "Dragon Fruit (White Flesh – Pink Skin)", price: 60, img: "https://media.istockphoto.com/id/1257511771/photo/dragon-fruit-isolated-on-white.jpg?s=612x612&w=0&k=20&c=EojMLRWx3YxTSUatFKPLmJcgcww12GXwWPWjfTVRYus=", type: "fruit" },
+      { name: "Dragon fruit (Red Flesh – Pink Skin)", price: 50, img: "https://media.istockphoto.com/id/2198068111/photo/close-up-a-fresh-dragon-fruit-isolated.jpg?s=612x612&w=0&k=20&c=X-7oLfukT-ezxEy-3SSPn1FnFlsts0WdSuIOM5a5p6I=", type: "fruit" },
+      { name: "Pineapple", price: 50, img: "https://t4.ftcdn.net/jpg/02/73/48/81/240_F_273488191_apKUSK7zF150VEJ1Jwnut9NZKtsHGjOg.jpg", type: "fruit" },
+      
+      
+
+      { name: "Marigold", price: 5, img: "https://media.istockphoto.com/id/493183382/photo/marigold-flower.jpg?s=612x612&w=0&k=20&c=FdewsGC4WmV-nNeBfMkuc__H2fyWeFqEs0_pxaGx7SA=", type: "phool" },
+      { name: "Marigold", price: 5, img: "https://media.istockphoto.com/id/885817678/photo/marigold-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=A0XLDxtYrAPQPPstb_lT0dtrYde7LfcHcH0cdRJ7xTU=", type: "phool" },
+      { name: "Lotus", price: 10, img: "https://media.istockphoto.com/id/1559682249/photo/beautiful-pink-fresh-lotus-isolated-in-the-white-background.jpg?s=612x612&w=0&k=20&c=_5FF3rYm9hWXcbVFK83SD8kFBOIwUut-HT6Q23iTsZ4=", type: "phool" },
+      
+      { name: "Rose", price: 10, img: "https://media.istockphoto.com/id/157330341/photo/a-full-single-red-rose-on-a-white-background.jpg?s=612x612&w=0&k=20&c=puhfwDAs2ZvIg0z2CCTUOH9RCsJFz7c3rhP-4yxDDYw=",type:"phool" },
+      { name: "Jasmine", price: 1, img: "https://media.istockphoto.com/id/1130649208/photo/jasmine.jpg?s=612x612&w=0&k=20&c=f0gPfHLq9aep9phLXaCh3jgtAq5LxVN8iQ00LNvkTm8=" , type: "phool"},
+      { name: "shami phool", price: 5, img: "https://media.istockphoto.com/id/1346929707/photo/closeup-of-religious-flower-of-prosopis-cineraria-also-known-as-ghaf-or-shami-isolated-over.jpg?s=612x612&w=0&k=20&c=MH75tphX6NpPSrlKBTZTC2w6fWKTn_vGvLeUL_vRkaw=", type: "phool" },
+      { name: "Hibiscus(arhul)", price: 4, img: "https://media.istockphoto.com/id/182703296/photo/closeup-of-red-hibiscus-on-white-background.jpg?s=612x612&w=0&k=20&c=kwkTTozV9I_9YaDMDPgAH3Wkr-bxFBwZr6XorxZqwSg=", type: "phool" },
+      { name: "Champa", price: 1, img: "https://media.istockphoto.com/id/2214604927/photo/plumeria-or-frangipani-flowers.jpg?s=612x612&w=0&k=20&c=iYWeRwyG3N7yja68jcEeOgy97Ek1YTqMqwF705Rk1BQ=", type: "phool" },
+      
+      { name: "belpatra", price: 1, img:"https://media.istockphoto.com/id/1391621064/photo/bael-leaves.jpg?s=612x612&w=0&k=20&c=EVG3KFKls02UAzx_prxLKkxhX04H4Jg9cdocxgqzwr0=", type: "phool" },
+      { name: "Tulsi leaf(तुलसी)", price: 0.5, img: "https://media.istockphoto.com/id/1334792657/photo/holy-basil-tulasi.jpg?s=612x612&w=0&k=20&c=f0jAWuglz_m3y60sMyQveg9RDS4gqvsMzcOlYDNvIrQ=", type: "phool" },
+        { name:"Bermuda Grass (दूबी घास)", price: 0.3, img: "https://media.istockphoto.com/id/1207414536/photo/top-view-green-bermuda-grass-lawn-grass-or-wire-grass-in-pot-isolated-on-white.jpg?s=612x612&w=0&k=20&c=wPoF9iuNRruZNpKY9oMZQosaKl4dg7dQGVQldFotYg8=", type: "phool" },
+       { name: "Mango leaf", price: 1, img: "https://media.istockphoto.com/id/689595490/photo/mango-leaves-on-white-background.jpg?s=612x612&w=0&k=20&c=XOBsAcbGL0uE1m_Ikh_fn8LoeC6GS57miK-UuhKqlDE=" , type: "phool"},
+        { name: "Banana leaf", price: 5, img: "https://media.istockphoto.com/id/466296394/photo/fresh-whole-banana-leaf.jpg?s=612x612&w=0&k=20&c=_3HnVzWWQobDlJbaCRO1LEA2Jck5c9RIaBM3K5tTrM8=", type: "phool" },
+       { name: "Cow Urine (गौमूत्र)", price: 10, img: "https://media.istockphoto.com/id/1397693514/photo/glass-bottle-isolated-on-white.jpg?s=612x612&w=0&k=20&c=SMq2IJOFaN2O9TgnCqHEQxE3d019EhAmMMkgd3KNQOE=", type: "phool" },
+       { name: "Dry cow dung", price: 5, img: "https://media.istockphoto.com/id/524179074/photo/pellet-for-heating.jpg?s=612x612&w=0&k=20&c=jKIpU5QzwuJRc1BR3MJu4Ecoh6_qcyEfdXY_rCBxaRg=", type: "phool" },
+      { name: "cow dung", price: 5, img: "https://media.istockphoto.com/id/1738805853/photo/dry-cow-excrement-isolated-close-top-view.jpg?s=612x612&w=0&k=20&c=KxbPoOWbHkT43HjthPYPWibRaLoZtPXyBqy0n8GFIPY=", type: "phool" },
+      
+      
+      { name: "aparajita", price: 1, img:"grocery/aparjita.jpg", type: "phool" },
+      { name: "Tulsi leaf(तुलसी)", price: 0.5, img: "https://media.istockphoto.com/id/1334792657/photo/holy-basil-tulasi.jpg?s=612x612&w=0&k=20&c=f0jAWuglz_m3y60sMyQveg9RDS4gqvsMzcOlYDNvIrQ=", type: "phool" },
+        { name:"Bermuda Grass (दूबी घास)", price: 0.3, img: "https://media.istockphoto.com/id/1207414536/photo/top-view-green-bermuda-grass-lawn-grass-or-wire-grass-in-pot-isolated-on-white.jpg?s=612x612&w=0&k=20&c=wPoF9iuNRruZNpKY9oMZQosaKl4dg7dQGVQldFotYg8=", type: "phool" },
+       { name: "Mango leaf", price: 1, img: "https://media.istockphoto.com/id/689595490/photo/mango-leaves-on-white-background.jpg?s=612x612&w=0&k=20&c=XOBsAcbGL0uE1m_Ikh_fn8LoeC6GS57miK-UuhKqlDE=" , type: "phool"},
+        { name: "Banana leaf", price: 5, img: "https://media.istockphoto.com/id/466296394/photo/fresh-whole-banana-leaf.jpg?s=612x612&w=0&k=20&c=_3HnVzWWQobDlJbaCRO1LEA2Jck5c9RIaBM3K5tTrM8=", type: "phool" },
+       { name: "Cow Urine (गौमूत्र)", price: 10, img: "https://media.istockphoto.com/id/1397693514/photo/glass-bottle-isolated-on-white.jpg?s=612x612&w=0&k=20&c=SMq2IJOFaN2O9TgnCqHEQxE3d019EhAmMMkgd3KNQOE=", type: "phool" },
+       { name: "Dry cow dung", price: 5, img: "https://media.istockphoto.com/id/524179074/photo/pellet-for-heating.jpg?s=612x612&w=0&k=20&c=jKIpU5QzwuJRc1BR3MJu4Ecoh6_qcyEfdXY_rCBxaRg=", type: "phool" },
+      { name: "cow dung", price: 5, img: "https://media.istockphoto.com/id/1738805853/photo/dry-cow-excrement-isolated-close-top-view.jpg?s=612x612&w=0&k=20&c=KxbPoOWbHkT43HjthPYPWibRaLoZtPXyBqy0n8GFIPY=", type: "phool" },
+      // 🛒 Grocery Items
+{ name: "Wheat Flour (Atta)", price: 45, img: "aata chaki.jpg", type: "grocery" },
+{ name: "Rice (Chawal)", price: 60, img: "https://m.media-amazon.com/images/I/81Y5JYfqdwL._SX522_.jpg", type: "grocery" },
+{ name: "Basmati Rice (Premium)", price: 120, img: "https://m.media-amazon.com/images/I/81qT4mKqzAL._SX522_.jpg", type: "grocery" },
+{ name: "Sugar (Cheeni)", price: 45, img: "grocery/sugar1.jpg", type: "grocery" },
+{ name: "Salt (Namak)", price: 20, img: "https://m.media-amazon.com/images/I/71aR0tH9R1L._SX522_.jpg", type: "grocery" },
+{ name: "Cooking Oil (Refined)", price: 150, img: "https://m.media-amazon.com/images/I/71SgZL5A-LL._SX522_.jpg", type: "grocery" },
+// 🛢️ Refined Cooking Oils
+{ name: "Fortune Sunlite Refined Sunflower Oil", price: 180, img: "grocery/fortune.webp", type: "grocery" },
+{ name: "Saffola Gold Refined Edible Oil", price: 200, img: "grocery/oip.jpeg", type: "grocery" },
+{ name: "Dhara Refined Soyabean Oil", price: 175, img: "https://m.media-amazon.com/images/I/71SVk6e9q4L._SX522_.jpg", type: "grocery" },
+{ name: "Sundrop Heart Refined Sunflower Oil", price: 185, img: "https://m.media-amazon.com/images/I/81e2pUyjhcL._SX522_.jpg", type: "grocery" },
+{ name: "Gemini Refined Sunflower Oil", price: 190, img: "https://m.media-amazon.com/images/I/61HYRGnW7rL._SX522_.jpg", type: "grocery" },
+{ name: "Emami Healthy & Tasty Refined Soyabean Oil", price: 185, img: "https://m.media-amazon.com/images/I/71tCqq+7LaL._SX522_.jpg", type: "grocery" },
+{ name: "Nature Fresh Refined Soyabean Oil", price: 170, img: "https://m.media-amazon.com/images/I/71o17uUo7kL._SX522_.jpg", type: "grocery" },
+{ name: "Patanjali Refined Soyabean Oil", price: 160, img: "https://m.media-amazon.com/images/I/81MBBLP8RuL._SX522_.jpg", type: "grocery" },
+{ name: "Ruchi Gold Refined Palm Oil", price: 165, img: "https://m.media-amazon.com/images/I/71SgZL5A-LL._SX522_.jpg", type: "grocery" },
+{ name: "Ginni Refined Sunflower Oil", price: 175, img: "https://m.media-amazon.com/images/I/71Xh+W7cgLL._SX522_.jpg", type: "grocery" },
+{ name: "Vijay Refined Sunflower Oil", price: 185, img: "https://m.media-amazon.com/images/I/71Yx+XfsSOL._SX522_.jpg", type: "grocery" },
+{ name: "Freedom Refined Sunflower Oil", price: 190, img: "https://m.media-amazon.com/images/I/71u2ybg9FSL._SX522_.jpg", type: "grocery" },
+{ name: "Gold Winner Refined Sunflower Oil", price: 195, img: "https://m.media-amazon.com/images/I/71QXbgrWRzL._SX522_.jpg", type: "grocery" },
+{ name: "Sweekar Refined Sunflower Oil", price: 185, img: "https://m.media-amazon.com/images/I/71tACRuTvgL._SX522_.jpg", type: "grocery" },
+{ name: "Vimal Refined Soyabean Oil", price: 165, img: "https://m.media-amazon.com/images/I/71dCX1ChbIL._SX522_.jpg", type: "grocery" },
+{ name: "Gemini Refined Cottonseed Oil", price: 175, img: "https://m.media-amazon.com/images/I/71eLkKp5P1L._SX522_.jpg", type: "grocery" },
+{ name: "Fortune Soyabean Refined Oil", price: 170, img: "https://m.media-amazon.com/images/I/71J5ukPli0L._SX522_.jpg", type: "grocery" },
+{ name: "Saffola Active Blended Edible Oil", price: 210, img: "https://m.media-amazon.com/images/I/71Vu3HjDXzL._SX522_.jpg", type: "grocery" },
+{ name: "Emami Refined Rice Bran Oil", price: 185, img: "https://m.media-amazon.com/images/I/71c46jYudEL._SX522_.jpg", type: "grocery" },
+{ name: "Fortune Rice Bran Health Oil", price: 190, img: "https://m.media-amazon.com/images/I/71kP3q2g3bL._SX522_.jpg", type: "grocery" },
+
+{ name: "Mustard Oil (Sarson Tel)", price: 180, img: "https://m.media-amazon.com/images/I/61r83pL8n2L._SX522_.jpg", type: "grocery" },
+{ name: "Tur Dal (Arhar Dal)", price: 130, img: "https://m.media-amazon.com/images/I/81LbqE1RJxL._SX522_.jpg", type: "grocery" },
+{ name: "Masoor Dal", price: 110, img: "grocery/masurdal.jpg", type: "grocery" },
+{ name: "Moong Dal", price: 120, img: "grocery/moong.jpg", type: "grocery" },
+{ name: "Chana Dal", price: 95, img: "grocery/chana dal.jpg", type: "grocery" },
+{ name: "Rajma (Kidney Beans)", price: 140, img: "https://m.media-amazon.com/images/I/81OdF6YAO4L._SX522_.jpg", type: "grocery" },
+{ name: "Kabuli Chana (White Chole)", price: 130, img: "grocery/whitchola.jpg", type: "grocery" },
+{ name: "Kala Chana (Black Chickpeas)", price: 100, img: "grocery/blackchana2.jpg", type: "grocery" },
+{ name: "Poha (Flattened Rice)", price: 40, img: "grocery/poha.jpg", type: "grocery" },
+{ name: "Suji (Semolina)", price: 45, img: "grocery/Suji.jpg", type: "grocery" },
+{ name: "Besan (Gram Flour)", price: 55, img: "grocery/Gram Flour.jpg", type: "grocery" },
+{ name: "Tea Powder (Chai Patti)", price: 150, img: "https://m.media-amazon.com/images/I/71hkEBySRzL._SX522_.jpg", type: "grocery" },
+{ name: "Coffee Powder", price: 250, img: "https://m.media-amazon.com/images/I/71gP0u1l46L._SX522_.jpg", type: "grocery" },
+{ name: "Toor Dal (Split Pigeon Pea)", price: 135, img: "https://m.media-amazon.com/images/I/81kOHLRyrXL._SX522_.jpg", type: "grocery" },
+{ name: "Jeera (Cumin Seeds)", price: 200, img:"grocery/Jeera.jpg", type: "grocery" },
+{ name: "Haldi Powder (Turmeric)", price: 40, img: "grocery/Haldi Powder.jpg", type: "grocery" },
+{ name: "Red Chilli Powder (Lal Mirch)", price: 50, img: "grocery/Red Chilli Powder1.jpg", type: "grocery" },
+{ name: "Red Chilli Powder (Lal Mirch)", price: 50, img: "grocery/kharaRed Chilli Powder.jpg", type: "grocery" },
+{ name: "Coriander Powder (Dhaniya)", price: 45, img: "grocery/Coriander Powder.jpg", type: "grocery" },
+{ name: "Coriander Powder (Dhaniya)", price: 45, img: "grocery/kharaCoriander Powder .jpg", type: "grocery" },
+{ name: "Black Pepper (Kali Mirch)", price: 220, img: "grocery/anarsa.jpeg", type: "grocery" },
+{ name: "Cloves (Laung)", price: 300, img: "https://snackfax.com/wp-content/uploads/2023/03/Thekua-1068x601.png", type: "grocery" },
+{ name: "Cardamom (Elaichi)", price: 400, img: "https://m.media-amazon.com/images/I/81q7IvgLrDL._SX522_.jpg", type: "grocery" },
+{ name: "Bay Leaf (Tej Patta)", price: 80, img: "https://m.media-amazon.com/images/I/81Z2k9cT+4L._SX522_.jpg", type: "grocery" },
+{ name: "Turmeric Root (Haldi)", price: 100, img: "https://m.media-amazon.com/images/I/81I7rhv4hZL._SX522_.jpg", type: "grocery" },
+{ name: "Tata Salt", price: 25, img: "https://m.media-amazon.com/images/I/71CYlKj7teL._SX522_.jpg", type: "grocery" },
+{ name: "Aashirvaad Atta", price: 55, img: "https://m.media-amazon.com/images/I/61u6gErnQhL._SX522_.jpg", type: "grocery" },
+{ name: "Fortune Sunlite Oil", price: 180, img: "https://m.media-amazon.com/images/I/61dWvjJpoVL._SX522_.jpg", type: "grocery" },
+{ name: "Soya Chunks (Nutrela)", price: 80, img: "https://m.media-amazon.com/images/I/81e2CH0gAfL._SX522_.jpg", type: "grocery" },
+{ name: "Detergent Powder (Surf Excel)", price: 120, img: "https://m.media-amazon.com/images/I/71EYb-KdoLL._SX522_.jpg", type: "grocery" },
+{ name: "Bath Soap (Lux)", price: 35, img: "https://m.media-amazon.com/images/I/71Fg06AzF+L._SX522_.jpg", type: "grocery" },
+{ name: "Toothpaste (Colgate)", price: 65, img: "https://m.media-amazon.com/images/I/71+4VnSe2UL._SX522_.jpg", type: "grocery" },
+
+
+// 🍘 Bihari Snacks
+{ name: "Thekua", price: 20, img: "https://snackfax.com/wp-content/uploads/2023/03/Thekua-1068x601.png", type: "bihari" },
+{ name: "Anarsa", price: 40, img: "grocery/anarsa.jpeg", type: "bihari" },
+{ name: "nimki", price: 30, img: "grocery/nimki.jpg", type: "bihari" },
+{ name: "Khaja", price: 25, img: "snacks/khaja.jpg", type: "bihari" },
+{ name: "Tilkut", price: 30, img: "snacks/tilkut.jpg", type: "bihari" },
+
+// 🥛 Milk Products
+{ name: "Fresh Milk", price: 50, img: "grocery/sudhagold.jpeg", type: "milk" },
+{ name: "Butter", price: 250, img: "grocery/sudhagold1.jpeg", type: "milk" },
+{ name: "Paneer", price: 200, img: "grocery/sudhasakti.jpeg", type: "milk" },
+{ name: "Desi Ghee", price: 500, img: "grocery/sudhasakti1.jpeg", type: "milk" },
+{ name: "Curd (Dahi)", price: 60, img: "grocery/sudhadahi.jpeg", type: "milk" },
+{ name: "Curd (Dahi)", price: 60, img: "grocery/sudhadahi1.jpeg", type: "milk" },
+{ name: "Butter", price: 250, img: "", type: "milk" },
+{ name: "Fresh Milk", price: 50, img: "", type: "milk" },
+{ name: "Butter", price: 250, img: "grocery/sudhagold1.jpeg", type: "milk" },
+{ name: "Paneer", price: 200, img: "grocery/sudhasakti.jpeg", type: "milk" },
+{ name: "Desi Ghee", price: 500, img: "grocery/sudhasakti1.jpeg", type: "milk" },
+{ name: "Curd (Dahi)", price: 60, img: "grocery/sudhadahi.jpeg", type: "milk" },
+{ name: "Butter", price: 250, img: "sudhagold1.jpeg", type: "milk" },
+
+
+// 🕉️ Puja / Pandit Sewa
+{ name: "Ganesh Puja by Panditji", price: 499, img: "puja/ganesh.jpg", type: "pandit" },
+{ name: "Satyanarayan Katha Puja", price: 799, img: "puja/satyanarayan.jpg", type: "pandit" },
+{ name: "Grih Pravesh Puja", price: 999, img: "puja/grihpravesh.jpg", type: "pandit" },
+{ name: "Mundan Sanskar Puja", price: 599, img: "puja/mundan.jpg", type: "pandit" },
+{ name: "Navgrah Shanti Puja", price: 899, img: "puja/navgrah.jpg", type: "pandit" },
+
+      
+];
+function displayItems() {
+  const vegGrid = document.getElementById("vegGrid");
+  const fruitGrid = document.getElementById("fruitGrid");
+  const flowerGrid = document.getElementById("flowerGrid");
+  const groceryGrid = document.getElementById("groceryGrid");
+
+  items.forEach(item => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.innerHTML = `
+      <img src="${item.img}" alt="${item.name}">
+      <h3>${item.name}</h3>
+      <p>₹${item.price}</p>
+      <button class="add-btn" onclick="addToCart('${item.name}', ${item.price}, '${item.img}')">Add to Cart</button>
+    `;
+
+    if (item.type === "veg") vegGrid.appendChild(card);
+    else if (item.type === "fruit") fruitGrid.appendChild(card);
+    else if (item.type === "phool") flowerGrid.appendChild(card);
+    else if (item.type === "grocery") groceryGrid.appendChild(card);
+  });
+}
+
+// ✅ Page load hone ke baad items display karo
+window.onload = displayItems;
+
+
+
+let pujaPaymentDone = false;
+
+
+const cart = [], quantities = {};
+const vegGrid = document.getElementById('vegGrid');
+const fruitGrid = document.getElementById('fruitGrid');
+const flowerGrid = document.getElementById('flowerGrid');
+const groceryGrid = document.getElementById('groceryGrid');
+const cartItems = document.getElementById('cartItems');
+const cartCount = document.getElementById('cart-count');
+const cartTotal = document.getElementById('cartTotal');
+const cartPopup = document.getElementById('cartPopup');
+const successPopup = document.getElementById('successPopup');
+const ordersPopup = document.getElementById('ordersPopup');
+
+function renderItems() {
+  items.forEach((item, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+     <img src="${item.img}" alt="${item.name}" onclick="openZoom('${item.img}')" style="cursor: zoom-in;">
+
+      <h2>${item.name}</h2>
+      <div class="controls">
+        <button onclick="changeQty(${index}, -1)">-</button>
+        <span id="qty-${index}">0 ${item.type === "phool" ? 'pc' : 'g'}</span>
+        <button onclick="changeQty(${index}, 1)">+</button>
+      </div>
+      <div class="price">₹${item.price} / ${item.type === "phool" ? 'pc' : '500g'}</div>
+      <div class="item-total" id="total-${index}" style="margin-top:6px;color:#1C482E;font-weight:bold;">Total: ₹0</div>
+      <button class="add-btn" onclick="addToCart(${index})">Add</button>
+    `;
+
+    // ✅ Fixed Section Routing
+    (item.type === "veg" ? vegGrid :
+      item.type === "fruit" ? fruitGrid :
+      item.type === "phool" ? flowerGrid :
+      item.type === "grocery" ? groceryGrid :
+      item.type === "bihari" ? document.getElementById("bihariSnacksGrid") :
+      item.type === "milk" ? document.getElementById("milkProductsGrid") :
+      document.getElementById("panditPujaGrid")
+    ).appendChild(card);
+
+  });
+}
+
+function filterItems() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const cards = document.querySelectorAll('.card');
+  let found = false;
+  cards.forEach(card => {
+    const name = card.querySelector('h2')?.innerText.toLowerCase();
+    const match = name.includes(search);
+    card.style.display = match ? 'block' : 'none';
+    if(match) found = true;
+  });
+  // Optional: show message if nothing found
+}
+
+function changeQty(index, delta) {
+  const item = items[index];
+  const step = item.type === "phool" ? 1 : 500;
+  quantities[index] = Math.max(0, (quantities[index] || 0) + delta * step);
+  document.getElementById(`qty-${index}`).innerText = `${quantities[index]} ${item.type === "phool" ? 'pc' : 'g'}`;
+  const total = item.type === "phool" ? quantities[index] * item.price : (quantities[index] / 500) * item.price;
+  document.getElementById(`total-${index}`).innerText = `Total: ₹${total.toFixed(2)}`;
+}
+
+function addToCart(index) {
+  const qty = quantities[index] || 0;
+  if (qty === 0) return;
+
+  const exists = cart.find(i => i.index === index);
+  if (exists) {
+    exists.qty += qty;
+  } else {
+    cart.push({ index, qty });
+  }
+
+  quantities[index] = 0;
+  document.getElementById(`qty-${index}`).innerText = `0 ${items[index].type === "phool" ? 'pc' : 'g'}`;
+  document.getElementById(`total-${index}`).innerText = `Total: ₹0`;
+
+  updateCart();
+
+  const popup = document.getElementById('addPopup');
+  popup.style.display = 'block';
+  setTimeout(() => popup.style.display = 'none', 1500);  
+}
+
+function updateCart() {
+  cartItems.innerHTML = '';
+  let total = 0;
+
+  cart.forEach((c, i) => {
+    const item = items[c.index];
+    const isPhool = item.type === "phool";
+    const price = isPhool ? c.qty * item.price : (c.qty / 500) * item.price;
+    total += price;
+
+    cartItems.innerHTML += `
+      <div class="cart-item">
+        <img src="${item.img}" alt="${item.name}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover; margin-right: 10px;" />
+        <div class="item-details">
+          <strong>${item.name}</strong>
+          <div class="qty-info">${isPhool ? c.qty + ' pc' : `${c.qty}g (${(c.qty/1000).toFixed(2)}kg)`}</div>
+          <div class="item-price">₹${price.toFixed(2)}</div>
+        </div>
+        <div class="action-buttons">
+          <button onclick="changeCartQty(${i}, -1)" class="qty-btn">➖</button>
+          <button onclick="changeCartQty(${i}, 1)" class="qty-btn">➕</button>
+          <button onclick="removeFromCart(${i})" class="remove-btn">🗑️</button>
+        </div>
+      </div>`;
+  });
+
+  cartCount.innerText = cart.length;
+  cartTotal.innerText = total.toFixed(2);
+}
+
+function removeFromCart(i) { cart.splice(i, 1); updateCart(); }
+
+function changeCartQty(i, delta) {
+  const cartItem = cart[i];
+  const item = items[cartItem.index];
+  const step = item.type === "phool" ? 1 : 250;
+  cartItem.qty = Math.max(0, cartItem.qty + delta * step);
+  if(cartItem.qty === 0) cart.splice(i,1);
+  updateCart();
+}
+
+function toggleCart() { cartPopup.style.display = cartPopup.style.display === 'block' ? 'none' : 'block'; }
+function toggleOrders() { loadOrderHistory(); ordersPopup.style.display = ordersPopup.style.display === 'block' ? 'none' : 'block'; }
+
+function goBack() {
+  if(cartPopup.style.display==='block') cartPopup.style.display='none';
+  else if(ordersPopup.style.display==='block') ordersPopup.style.display='none';
+  else alert("Nothing to go back from.");
+}
+
+
+// Initialize Tracker
+function updateRewardTracker() {
+  let count = parseInt(localStorage.getItem("orderCount") || 0);
+  let percent = (count / 21) * 100;
+  document.getElementById("progressFill").style.width = percent + "%";
+  document.getElementById("progressText").innerText = 
+    `${count} / 21 Orders Completed – ${21 - count} left`;
+}
+
+// Show Rules Popup
+function showRewardRules() {
+  document.getElementById("rulesPopup").style.display = 'block';
+}
+function closeRules() {
+  document.getElementById("rulesPopup").style.display = 'none';
+}
+
+function placeOrder() {
+  if (cart.length === 0) return alert("Cart is empty!");
+
+  const name = document.getElementById('fullName').value.trim();
+  const mobile = document.getElementById('mobile').value.trim();
+  const address = document.getElementById('address').value.trim();
+  const pin = document.getElementById('pin').value.trim();
+  const state = document.getElementById('state').value.trim();
+  const district = document.getElementById('district').value.trim();
+  const timeSlot = document.getElementById('timeSlot').value;
+  const payment = document.querySelector('input[name="payment"]:checked')?.value || 'COD';
+
+  if (!name || !mobile || !address || !pin || !state || !district) {
+    return alert("Please fill all address details.");
+  }
+
+  const match = serviceableAreas.find(area => {
+    if (area.state.toLowerCase() !== state.toLowerCase()) return false;
+    return area.district.some(
+      d => d.name.toLowerCase() === district.toLowerCase() && d.pincodes.includes(pin)
+    );
+  });
+
+  if (!match) return alert("Sorry! We don't deliver to your location yet.");
+
+  // ✅ Items with price + rate
+  const itemsWithPrice = cart.map(c => {
+    const product = items[c.index];
+    return {
+      name: product.name,
+      qty: c.qty,
+      type: product.type,
+      price: product.price, // ✅ required for invoice
+      rate: product.price   // ✅ for compatibility
+    };
+  });
+
+  // ✅ Total calculation
+  let total = itemsWithPrice.reduce((sum, item) => {
+    if (item.type === "phool") {
+      return sum + (item.qty * item.price); // per pc
+    } else {
+      return sum + ((item.qty / 500) * item.price); // per kg
+    }
+  }, 0);
+
+    // ✅ Hybrid Rule: Only if total >=200 AND contains veg/fruit
+  let hasMainItem = itemsWithPrice.some(it => it.type === "veg" || it.type === "fruit");
+  let count = parseInt(localStorage.getItem("orderCount") || 0);
+
+  if (total >= 200 && hasMainItem) {
+    count++;
+    if (count === 21) {
+      let discount = total >= 500 ? 250 : 50;
+      total -= discount; // update total with discount
+      alert(`🎉 21st Order Reward Applied! You got ₹${discount} OFF`);
+      count = 0; // reset cycle
+    }
+    localStorage.setItem("orderCount", count);
+    updateRewardTracker();
+  }
+
+
+  const order = {
+    id: "ORD-" + Date.now(),
+    customer: {
+    name,
+    mobile,
+    address: `${address}, ${district}, ${state} - ${pin}`
+  },
+    timeSlot,
+    payment,
+    date: new Date().toISOString(),
+    status: "⏳ Pending",
+    items: itemsWithPrice,
+    total: total
+  };
+
+  // Save order
+  const history = JSON.parse(localStorage.getItem("orderHistory") || "[]");
+  history.push(order);
+  localStorage.setItem("orderHistory", JSON.stringify(history));
+
+  cart.length = 0;
+  updateCart();
+
+  cartPopup.style.display = 'none';
+  successPopup.style.display = 'block';
+  setTimeout(() => (successPopup.style.display = 'none'), 3000);
+
+  // ✅ Auto-download invoice on order placement
+  downloadInvoice(encodeURIComponent(JSON.stringify(order)));
+  // ✅ Send to Google Sheets via Apps Script
+fetch("https://script.google.com/macros/s/AKfycbxZO0VaM2dzGjedM00a7yQsODUTB-bk50HnncQq3LDqBv-Fn2AEbxKged292G1rZY-0/exec", {
+  method: "POST",
+  body: JSON.stringify(order),
+  headers: { "Content-Type": "application/json" }
+})
+.then(res => res.json())
+.then(data => {
+  if (data.result === "success") {
+    console.log("✅ Order saved in Google Sheet!");
+  } else {
+    console.error("❌ Google Script Error:", data.message);
+  }
+})
+.catch(err => console.error("⚠️ Fetch error:", err));
+
+
+}
+
+
+
+function loadStates() {
+  const stateSelect = document.getElementById("state");
+  stateSelect.innerHTML = `<option value="">Select State</option>`; 
+  serviceableAreas.forEach(area=>{ const option=document.createElement("option"); option.value=area.state; option.textContent=area.state; stateSelect.appendChild(option); });
+}
+
+function loadDistricts() {
+  const stateVal = document.getElementById("state").value;
+  const districtSelect = document.getElementById("district");
+  districtSelect.innerHTML = `<option value="">Select District</option>`;
+  const stateObj = serviceableAreas.find(area=>area.state===stateVal);
+  if(stateObj) stateObj.district.forEach(d=>{ const opt=document.createElement("option"); opt.value=d.name; opt.textContent=d.name; districtSelect.appendChild(opt); });
+}
+
+function loadPincodes() {
+  const stateVal = document.getElementById("state").value;
+  const districtVal = document.getElementById("district").value;
+  const pinSelect = document.getElementById("pin");
+  pinSelect.innerHTML = `<option value="">Select Pincode</option>`;
+  const stateObj = serviceableAreas.find(area=>area.state===stateVal);
+  if(stateObj){
+    const districtObj = stateObj.district.find(d=>d.name===districtVal);
+    if(districtObj) districtObj.pincodes.forEach(p=>{ const opt=document.createElement("option"); opt.value=p; opt.textContent=p; pinSelect.appendChild(opt); });
+  }
+}
+
+
+
+function saveOrder(orderData) {
+  // Purana history nikal lo
+  let history = JSON.parse(localStorage.getItem("orderHistory") || "[]");
+
+  // Ensure har item me sahi format ho
+  let items = orderData.items.map(item => {
+    return {
+      name: item.name,
+      qty: item.qty,          // g ya pc
+      rate: Number(item.rate) || 0, // rate number me ho
+      type: item.type         // "sabzi" | "fruit" | "phool"
+    };
+  });
+
+  // Total calculate karo
+  let total = items.reduce((sum, item) => {
+    if (item.type === "phool") {
+      return sum + (item.qty * item.rate);     // phool = per pc
+    } else {
+      return sum + ((item.qty / 1000) * item.rate); // sabzi/fruit = per kg
+    }
+  }, 0);
+
+  // Naya order object
+  let newOrder = {
+    date: new Date().toISOString(),
+    customer: {
+      name: orderData.customer?.name || "Customer",
+      address: orderData.customer?.address || "",
+    },
+    district: orderData.district || "",
+    state: orderData.state || "",
+    pin: orderData.pin || "",
+    timeSlot: orderData.timeSlot || "5 AM – 9 AM",
+    payment: orderData.payment || "COD",
+    items: items,
+    total: total
+  };
+
+  // History me add karo
+  history.push(newOrder);
+  localStorage.setItem("orderHistory", JSON.stringify(history));
+
+  alert("✅ Order saved successfully!");
+}
+
+
+// Orders History
+function loadOrderHistory() {
+  const history = JSON.parse(localStorage.getItem("orderHistory") || "[]");
+  const list = document.getElementById('orderHistoryList');
+  list.innerHTML = "";
+
+  if (history.length === 0) {
+    list.innerHTML = "<p>No past orders found.</p>";
+    return;
+  }
+
+  history.reverse().forEach((order, i) => {
+    const orderId = "ORD" + (1000 + i);
+    const dateTime = new Date(order.date).toLocaleString();
+
+    const div = document.createElement("div");
+    div.className = "order-entry";
+    div.style = `
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+      border-left: 6px solid #28a745;
+      overflow-x: auto;  /* ✅ Mobile ke liye responsive */
+    `;
+
+    // ✅ Items Table
+    const itemsTable = `
+      <div style="overflow-x:auto; max-width:100%;">
+        <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; min-width: 480px; font-size: 14px; width:100%;">
+          <thead style="background:#f5f5f5;">
+            <tr>
+              <th>#</th>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Rate</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(Array.isArray(order.items) ? order.items : []).map((item, idx) => {
+              let unit = item.type === 'phool'
+                ? `${item.qty} pc`
+                : item.qty >= 1000
+                  ? `${(item.qty/1000).toFixed(2)} kg`
+                  : `${item.qty} g`;
+
+              let total = item.type === 'phool'
+                ? item.qty * (item.rate || 0)
+                : (item.qty / 500) * (item.rate || 0);
+
+              return `
+                <tr>
+                  <td>${idx+1}</td>
+                  <td>${item.name}</td>
+                  <td>${unit}</td>
+                  <td>₹${item.rate || 0}</td>
+                  <td>₹${Number(total).toFixed(2)}</td>
+                </tr>
+              `;
+            }).join('')}
+            <tr>
+              <td colspan="4" style="text-align:right; font-weight:bold;">Grand Total</td>
+              <td style="font-weight:bold;">₹${Number(order.total || 0).toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+    
+// ✅ Extra section for Puja Special Orders
+let pujaSection = "";
+if (order.type === "puja-special") {
+  pujaSection = `
+    <div style="margin-top:10px; padding:10px; background:#fff8e1; border:1px solid #f0c36d; border-radius:8px;">
+      <p><b>🌸 Special Puja List</b> (₹200 extra)</p>
+      ${order.note ? `<p>📝 Note: ${order.note}</p>` : ""}
+      ${order.fileData ? `<img src="${order.fileData}" style="max-width:200px; border:1px solid #ccc; margin-top:8px;">` : ""}
+    </div>
+  `;
+}
+
+    // ✅ Final Order Block
+    div.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <h4 style="margin: 0;">🧾 Order ID: ${orderId}</h4>
+        <span style="font-weight: bold; color: green;">${order.status || "🕒 Pending"}</span>
+      </div>
+
+      <p><strong>Date:</strong> ${dateTime}</p>
+      <p><strong>Name:</strong> ${order.customer?.name || "-"} | 
+         <strong>Mobile:</strong> ${order.customer?.mobile || "-"}</p>
+      <p><strong>Address:</strong> ${order.customer?.address || ""}, ${order.district}, ${order.state} - ${order.pin}</p>
+
+      ${itemsTable}
+      ${pujaSection} 
+
+      <p><strong>Payment Mode:</strong> ${order.payment || 'COD'}</p>
+      <p><strong>Delivery Slot:</strong> ${order.timeSlot}</p>
+
+      <button onclick="downloadInvoice('${encodeURIComponent(JSON.stringify(order))}')" 
+        style="margin-top:10px; background:#1C482E; color:white; border:none; padding:6px 12px; border-radius:6px;">
+        📥 Download Invoice
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+
+function downloadInvoice(orderStr) {
+  const order = JSON.parse(decodeURIComponent(orderStr));
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFont("helvetica", "normal");
+
+  // ✅ Logo + Header
+  const logo = document.getElementById("logoImg")?.src;
+  if (logo) doc.addImage(logo, "PNG", 14, 10, 25, 25);
+  doc.setFontSize(20).setFont("helvetica", "bold");
+  doc.text("Avanti", 45, 20);
+  doc.setFontSize(12).setFont("helvetica", "normal");
+  doc.text("Fresh Vegetables, Fruits & Puja Flowers", 45, 28);
+  doc.line(14, 35, 196, 35);
+
+  // ✅ Invoice Info
+  const invoiceNo = "INV-" + new Date().getTime();
+  doc.setFontSize(11);
+  doc.text(`Invoice No: ${invoiceNo}`, 14, 42);
+  doc.text(`Date: ${new Date(order.date).toLocaleString()}`, 140, 42);
+
+  // ✅ Customer Details
+  doc.setFontSize(12).setFont("helvetica", "bold");
+  doc.text("Customer Details", 14, 52);
+  doc.setFont("helvetica", "normal").setFontSize(11);
+
+  let y = 60;
+  doc.text(`Name: ${order.customer?.name || "-"}`, 14, y); y += 6;
+  doc.text(`Mobile: ${order.customer?.mobile || "-"}`, 14, y); y += 6;
+  let addressText = doc.splitTextToSize(`Address: ${order.customer?.address || "-"}`, 180);
+  doc.text(addressText, 14, y); y += addressText.length * 6;
+  doc.text(`Payment Mode: ${order.payment}`, 14, y); y += 6;
+  doc.text(`Delivery Slot: ${order.timeSlot}`, 14, y); y += 10;
+
+  // ✅ Green Separator
+  doc.setDrawColor(34, 139, 34);
+  doc.setLineWidth(0.6);
+  doc.line(14, y, 100, y);
+  doc.line(130, y, 196, y);
+  doc.setFont("helvetica", "bold").setFontSize(11).setTextColor(34, 139, 34);
+  doc.text("Order Details", 105, y + 3, { align: "center" });
+  doc.setTextColor(0);
+  y += 12;
+
+  // ✅ Normal Cart Order
+  if (order.type !== "puja-special") {
+    const rows = (Array.isArray(order.items) ? order.items : []).map((item, idx) => {
+      let qtyText =
+        item.type === "phool" ? `${item.qty} pc`
+        : item.qty >= 1000 ? `${(item.qty/1000).toFixed(2)} kg`
+        : `${item.qty} g`;
+      let rateText =
+        item.type === "phool" ? `Rs. ${item.rate}/pc`
+        : `Rs. ${item.rate}/500g`;
+      let total = item.type === "phool"
+        ? item.qty * item.rate
+        : (item.qty/500) * item.rate;
+      return [idx+1, item.name, qtyText, rateText, `Rs.${total.toFixed(2)}`];
+    });
+
+    // ✅ Adjusted widths to avoid warning
+    let colWidths = [10, 68, 30, 34, 34]; // total = 176 (fits in page)
+    doc.autoTable({
+      startY: y,
+      head: [["#", "Item", "Quantity", "Rate", "Total"]],
+      body: rows,
+      theme: "grid",
+      styles: { font: "helvetica", fontSize: 11, cellPadding: 3, overflow: 'linebreak' },
+      headStyles: { fillColor: [28,72,46], textColor: 255, halign: "center" },
+      columnStyles: {
+        0:{halign:"center",cellWidth:colWidths[0]},
+        1:{halign:"left",cellWidth:colWidths[1]},
+        2:{halign:"center",cellWidth:colWidths[2]},
+        3:{halign:"right",cellWidth:colWidths[3]},
+        4:{halign:"right",cellWidth:colWidths[4]}
+      },
+      tableWidth: 'auto'
+    });
+
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY,
+      body: [[
+        { content: "Grand Total", colSpan: 4, styles:{halign:"right",fontStyle:"bold"} },
+        { content: `Rs. ${Number(order.total).toFixed(2)}`, styles:{halign:"right",fontStyle:"bold"} }
+      ]],
+      theme:"grid",
+      styles:{ font:"helvetica", fontSize:12, cellPadding:3 }
+    });
+    y = doc.lastAutoTable.finalY + 10;
+  }
+
+  // ✅ Puja Special Order
+  else {
+    let imgY = y;
+    doc.setFont("helvetica","bold").setFontSize(13);
+    doc.text("Special Puja List", 14, imgY - 5);
+
+    if (order.fileData) {
+      try {
+        doc.setDrawColor(0,128,0);
+        doc.setFillColor(240,255,240);
+        doc.roundedRect(14,imgY,80,80,5,5,"FD");
+        let imgType = order.fileData.startsWith("data:image/png") ? "PNG" : "JPEG";
+        doc.addImage(order.fileData, imgType, 15, imgY+1, 78, 78);
+      } catch(e){
+        doc.text("⚠ Puja list image could not be added", 15, imgY+20);
+      }
+    }
+
+    // Charges Summary
+    let summaryX = 100;
+    let summaryY = imgY;
+    doc.setFont("helvetica","bold").setFontSize(12);
+    doc.text("Charges Summary:", summaryX, summaryY);
+    summaryY += 8;
+    doc.setFont("helvetica","normal").setFontSize(11);
+    [
+      `Service Charge (Paid Online): Rs. ${order.serviceCharge || 200}`,
+      "Items Cost: To be calculated",
+      "Payable on Delivery (COD): As per market bill",
+      "",
+      "- Rs. 200 service charge already paid online.",
+      "- Items cost will be calculated as per actual market bill.",
+      "- Original shopkeeper bill will be provided at delivery.",
+      "- COD amount = As per that bill."
+    ].forEach(line=>{
+      let wrapped = doc.splitTextToSize(line, 95);
+      doc.text(wrapped, summaryX, summaryY);
+      summaryY += wrapped.length*5 + 2;
+    });
+
+    y = imgY + 95;
+
+    // COD Pending Box
+    let boxY = y;
+    doc.setDrawColor(34,139,34);
+    doc.setFillColor(232,245,233);
+    doc.setTextColor(34,100,34);
+    let codText = [
+      "✅ COD Pending: To be calculated at delivery (Market Bill)",
+      "📌 Original shopkeeper bill will be attached at delivery."
+    ];
+    let wrappedCOD = [];
+    codText.forEach(line=>{ wrappedCOD = wrappedCOD.concat(doc.splitTextToSize(line,170)); });
+    let boxHeight = wrappedCOD.length*6 + 10;
+    doc.roundedRect(14, boxY, 180, boxHeight, 3, 3, "FD");
+    let textY = boxY+8;
+    wrappedCOD.forEach(line=>{ doc.text(line,20,textY); textY+=6; });
+    doc.setTextColor(0);
+    y = boxY + boxHeight + 10;
+  }
+
+  // ✅ Why Choose Us
+  doc.setFont("helvetica","bold").setFontSize(12);
+  doc.text("Why Choose Avanti?", 14, y);
+  doc.setFont("helvetica","normal").setFontSize(11);
+  doc.text("- Freshness Guaranteed – Direct from farms", 14, y+8);
+  doc.text("- Market Competitive Prices", 14, y+14);
+  doc.text("- Next Morning Delivery", 14, y+20);
+  doc.text("- Trusted by Families in Patna & Beyond", 14, y+26);
+
+  // ✅ Save PDF
+  doc.save(`Invoice_${invoiceNo}.pdf`);
+}
+
+
+
+
+// ✅ Ye function ko bahar rakhna hai
+function scrollToCategory(sectionId) {
+  const section = document.getElementById(sectionId);
+  if (section) {
+    const headerOffset = 600; // fixed header ki height
+    const elementPosition = section.getBoundingClientRect().top + window.scrollY;
+    const offsetPosition = elementPosition - headerOffset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth"
+    });
+  }
+}
+
+// Fly-to-cart effect
+// Fly to cart effect (scroll-proof version)
+document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("add-btn")) {
+    let card = e.target.closest(".card");
+    let img = card.querySelector("img");
+    let name = card.querySelector("h2").innerText;
+
+    // Ensure image exists
+    if(!img) return;
+
+    let flyItem = document.createElement("div");
+    flyItem.classList.add("fly-item");
+    flyItem.innerHTML = `<img src="${img.src}"><span>${name}</span>`;
+    document.body.appendChild(flyItem);
+
+    // start position (adjust for scroll)
+    let rect = img.getBoundingClientRect();
+    flyItem.style.position = "absolute";
+    flyItem.style.left = (rect.left + window.scrollX) + "px";
+    flyItem.style.top = (rect.top + window.scrollY) + "px";
+    flyItem.style.zIndex = 1000;
+    flyItem.style.transition = "all 0.8s ease";
+
+    // cart position
+    let cart = document.querySelector(".cart-btn");
+    let cartRect = cart.getBoundingClientRect();
+    let targetX = cartRect.left + window.scrollX;
+    let targetY = cartRect.top + window.scrollY;
+
+    // animate to cart
+    setTimeout(() => {
+      flyItem.style.left = targetX + "px";
+      flyItem.style.top = targetY + "px";
+      flyItem.style.opacity = "0.3";
+      flyItem.style.transform = "scale(0.5)";
+    }, 50);
+
+    // remove after animation
+    setTimeout(() => {
+      flyItem.remove();
+    }, 900);
+
+
+  }
+
+
+});
+
+function scrollToFooter() {
+  const footer = document.querySelector(".footer");
+  if (footer) {
+    footer.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
+
+
+function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+
+function shareFullDetailsOnWhatsApp() {
+  let name = document.getElementById("fullName").value || "Not provided";
+  let mobile = document.getElementById("mobile").value || "Not provided";
+  let address = document.getElementById("address").value || "Not provided";
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      let lat = position.coords.latitude;
+      let lng = position.coords.longitude;
+      let mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+
+      // ✅ Apna WhatsApp number (country code ke sath, bina + aur space ke)
+      let phoneNumber = "919334490327";  
+
+      let message =
+`🛒 New Customer Order
+
+👤 Name: ${name}
+📞 Mobile: ${mobile}
+🏠 Address: ${address}
+📍 Location: ${mapsLink}`;
+
+      let whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+      // ✅ WhatsApp link open karo
+      window.location.href = whatsappUrl; 
+    }, function(err) {
+      alert("Error detecting location: " + err.message);
+    }, { enableHighAccuracy: true });
+  } else {
+    alert("Geolocation not supported.");
+  }
+}
+
+
+// ✅ Exact Location Auto Detect using GPS + OpenStreetMap Nominatim API
+function detectLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(success, error, { enableHighAccuracy: true });
+  } else {
+    alert("Geolocation not supported by this browser.");
+  }
+
+  function success(position) {
+    let lat = position.coords.latitude;
+    let lng = position.coords.longitude;
+
+    console.log("Lat:", lat, "Lng:", lng); // Debug ke liye
+
+    // OpenStreetMap Nominatim API for Reverse Geocoding
+    let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.display_name) {
+          document.getElementById("address").value = data.display_name;
+          alert("📍 Location detected: " + data.display_name);
+        } else {
+          alert("Address not found!");
+        }
+      })
+      .catch(err => {
+        console.error("Geocoding error:", err);
+        alert("Error fetching address.");
+      });
+  }
+
+  function error(err) {
+    alert("Location access denied ya GPS off hai. (" + err.message + ")");
+  }
+}
+
+
+window.onload = ()=>{ renderItems(); loadStates(); }
+// Auto highlight category buttons on scroll
+const sections = {
+  vegSection: document.getElementById("vegSection"),
+  fruitSection: document.getElementById("fruitSection"),
+  flowerSection: document.getElementById("flowerSection"),
+  grocerySection: document.getElementById("grocerySection"),
+};
+
+const buttons = document.querySelectorAll(".category-bar button");
+
+window.addEventListener("scroll", () => {
+  let current = "";
+
+  for (let id in sections) {
+    const section = sections[id];
+    const sectionTop = section.offsetTop - 140; // header offset
+    if (window.scrollY >= sectionTop) {
+      current = id;
+    }
+  }
+
+  buttons.forEach(btn => {
+    btn.classList.remove("active");
+    if (btn.getAttribute("onclick").includes(current)) {
+      btn.classList.add("active");
+    }
+  });
+});
+
+
+
+function submitUpload() {
+  const fileInput = document.getElementById("uploadList");
+  const note = document.getElementById("uploadNote").value;
+  if (!fileInput.files.length) {
+    alert("⚠️ कृपया पहले कोई file चुनें।");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const customer = JSON.parse(localStorage.getItem("currentUser")) || {name:"Guest", email:"-"};
+
+  // ✅ WhatsApp message
+  let msg = `📦 New Special List Order\n\n👤 Name: ${customer.name}\n📧 Email: ${customer.email}\n📂 File: ${file.name}\n📝 Note: ${note || "N/A"}\n\n⚡ हमारी team जल्दी ही process करेगी।`;
+
+  // 👉 Apna WhatsApp Business number yaha lagao
+  let whatsappURL = "https://wa.me/919334490327text=" + encodeURIComponent(msg);
+
+  // WhatsApp open kare
+  window.open(whatsappURL, "_blank");
+
+  // My Orders me bhi save karo
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  orders.push({
+    type: "Special List",
+    file: file.name,
+    note: note,
+    date: new Date().toLocaleString()
+  });
+  localStorage.setItem("orders", JSON.stringify(orders));
+
+  alert("✅ " + file.name + " uploaded successfully!");
+  closeUploadPopup();
+}
+function openPujaUpload() {
+  document.getElementById("pujaUploadPopup").style.display = "block";
+}
+
+function closePujaUpload() {
+  document.getElementById("pujaUploadPopup").style.display = "none";
+}
+// Replace your existing submitPujaUpload() with this (OCR & payment removed)
+function submitPujaUpload() {
+  const fileInput = document.getElementById("pujaFile");
+  if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+    alert("कृपया एक file upload करें!");
+    return;
+  }
+
+  const name = (document.getElementById("pujaName")?.value || "").trim();
+  const mobile = (document.getElementById("pujaMobile")?.value || "").trim();
+  const address = (document.getElementById("pujaAddress")?.value || "").trim();
+  const slot = (document.getElementById("pujaSlot")?.value || "");
+  const note = (document.getElementById("pujaNote")?.value || "");
+
+  // ✅ fileData हटाया गया → सिर्फ़ file name रखा
+  const newOrder = {
+    type: "puja-special",
+    date: new Date().toLocaleString(),
+    total: 200,
+    customer: { name, mobile, address },
+    timeSlot: slot,
+    note,
+    fileName: fileInput.files[0].name, // सिर्फ़ file का नाम
+    fileText: "" // OCR हटाया
+  };
+
+  const orderHistory = JSON.parse(localStorage.getItem("orderHistory") || "[]");
+  orderHistory.push(newOrder);
+  localStorage.setItem("orderHistory", JSON.stringify(orderHistory));
+
+  // popup बंद करो
+  const popup = document.getElementById("pujaUploadPopup");
+  if (popup) popup.style.display = "none";
+
+  alert("🎉 Special Puja Order placed successfully!");
+  if (typeof loadOrderHistory === "function") loadOrderHistory();
+}
+
+
+function confirmPujaPayment() {
+  pujaPaymentDone = true;
+  document.getElementById("pujaPaymentPopup").style.display = "none";
+  alert("✅ Payment successful! अब आप अपना Puja List order place कर सकते हैं.");
+}
+
+function cancelPujaPayment() {
+  pujaPaymentDone = false;
+  document.getElementById("pujaPaymentPopup").style.display = "none";
+  alert("❌ Payment cancel. Order place नहीं होगा.");
+}
+
+
+function goBack() {
+  let cartPopup = document.getElementById("cartPopup");
+  let ordersPopup = document.getElementById("ordersPopup");
+
+  if (cartPopup.style.display === "block") {
+    cartPopup.style.display = "none";
+  } else if (ordersPopup.style.display === "block") {
+    ordersPopup.style.display = "none";
+  }
+}
+
+// 🧠 Image Zoom Functions
+function openZoom(imgSrc) {
+  const popup = document.getElementById("imageZoomPopup");
+  const zoomedImage = document.getElementById("zoomedImage");
+  zoomedImage.src = imgSrc;
+  popup.style.display = "flex";
+}
+
+function closeZoom() {
+  document.getElementById("imageZoomPopup").style.display = "none";
+}
+
+
+updateRewardTracker();
+
+</script>
+
+<script src="avantilogo.png"></script>
+<button id="checkoutBtn" class="checkout-btn" onclick="toggleCart()">
+  🛒 View Cart
+</button>
+
+<footer class="footer">
+  <div class="footer-container">
+    
+    <!-- Branding -->
+    <div class="footer-brand">
+      <h2>Avanti</h2>
+      <p>Seedha Kisan se, aapke ghar tak</p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="footer-nav">
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a href="#"target="_blank">Home</a>
+        <li><a href="indexabout.html">About Us</a></li>
+        <li><a href="indexcontact.html">Contact Us</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact -->
+    <div class="footer-contact">
+      <h3>Contact</h3>
+      <p>📞 +91 9334490327</p>
+      <p>📞 +91 840966546</p>
+      <p>📧 info@avanti.com</p>
+      <p>🏠 Buddha Colony, Patna</p>
+    </div>
+
+    <!-- Social Media -->
+    <div class="footer-social">
+      <h3>Follow Us</h3>
+      <a href="https://www.instagram.com/indias_avanti?igsh=MTAzNDFkZ3dxbGVpcw==" target="_blank">Instagram</a>
+      <a href="#" target="_blank">Facebook</a>
+      <a href="#" target="_blank">X</a>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2025 Avanti. All Rights Reserved.</p>
+  </div>
+</footer>
+<div id="pujaUploadPopup" class="cart-popup" style="display:none; max-width:500px; text-align:center;">
+  <h2 style="color:#c0392b;">🌸 Special Puja List Upload</h2>
+  <p style="color:#444;">इस फीचर का उपयोग करने के लिए <b>₹200</b> service charge।</p>
+  <p>📷 अपनी <b>Puja List की image / PDF</b> upload करें।</p>
+  <input type="file" id="pujaFile" accept="image/*,.pdf,.txt" style="margin:10px 0;">
+  <textarea id="pujaNote" placeholder="📝 कोई extra detail लिखें..." style="width:95%; height:70px; border-radius:8px; padding:8px;"></textarea>
+
+  <h3>📦 Delivery Details</h3>
+  <input placeholder="Full Name" id="pujaName" style="width:95%; margin:6px;"/>
+  <input placeholder="Mobile Number" id="pujaMobile" style="width:95%; margin:6px;"/>
+  <input placeholder="Address" id="pujaAddress" style="width:95%; margin:6px;"/>
+
+  <select id="pujaSlot" style="width:95%; margin:6px;">
+    <option value="6-8 AM">6–8 AM</option>
+    <option value="8-10 AM">8–10 AM</option>
+    <option value="10-12 PM">10–12 PM</option>
+    <option value="4-6 PM">4–6 PM</option>
+  </select>
+
+  <button onclick="submitPujaUpload()" class="place-order">✅ Place Special Puja Order</button>
+  <button onclick="closePujaUpload()" class="back-btn" style="margin-top:10px;">❌ Cancel</button>
+</div>
+</body>
+</html>
+
+       
