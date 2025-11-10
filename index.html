@@ -1269,6 +1269,55 @@ function setActiveButton(btn) {
     grid-template-columns: 1fr !important;
   }
 }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  justify-items: center;
+}
+
+/* mobile pe 2-column force */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* bahut chhoti screen pe single column */
+@media (max-width: 400px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+/* ✅ FINAL OVERRIDE — 2 Item per Row Always */
+.grid,
+#vegGrid,
+#fruitGrid,
+#flowerGrid,
+#groceryGrid,
+#bihariSnacksGrid,
+#milkProductsGrid,
+#panditPujaGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 15px !important;
+  justify-items: center !important;
+  align-items: start !important;
+}
+
+/* ✅ Small screen (below 400px) — single column */
+@media (max-width: 400px) {
+  .grid,
+  #vegGrid,
+  #fruitGrid,
+  #flowerGrid,
+  #groceryGrid,
+  #bihariSnacksGrid,
+  #milkProductsGrid,
+  #panditPujaGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
 
 
 </style>
@@ -2430,7 +2479,7 @@ function downloadInvoice(orderStr) {
 function scrollToCategory(sectionId) {
   const section = document.getElementById(sectionId);
   if (section) {
-    const headerOffset = 305; // fixed header ki height
+    const headerOffset = 230; // fixed header ki height
     const elementPosition = section.getBoundingClientRect().top + window.scrollY;
     const offsetPosition = elementPosition - headerOffset;
 
