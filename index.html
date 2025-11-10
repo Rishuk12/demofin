@@ -1318,6 +1318,23 @@ function setActiveButton(btn) {
     grid-template-columns: 1fr !important;
   }
 }
+#ordersPopup .back-btn {
+  background: linear-gradient(90deg, #1C482E, #3C803F);
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  transition: transform 0.2s, background 0.3s;
+}
+
+#ordersPopup .back-btn:hover {
+  background: linear-gradient(90deg, #3C803F, #1C482E);
+  transform: scale(1.05);
+}
 
 
 </style>
@@ -1335,9 +1352,18 @@ function setActiveButton(btn) {
     <button class="contact-btn" onclick="scrollToFooter()">📞Contact </button>
     <div class="cart-btn" onclick="toggleCart()">🛒Cart  (<span id="cart-count">0</span>)</div>
     <div class="order-btn" onclick="toggleOrders()">📦My Orders </div>
+
+
   </div>
   <!-- Reward Tracker -->
-
+<div class="reward-tracker">
+  <div class="progress-text" id="progressText">0 / 21 Orders Completed</div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <button onclick="showRewardRules()" class="location-btn">📖 Reward Rules</button>
+</div>
+<hr class="reward-divider">
 
 
 <!-- Reward Rules Popup -->
@@ -1489,10 +1515,13 @@ function setActiveButton(btn) {
   </div>
 
   <div class="orders-popup" id="ordersPopup">
-    <h2>My Orders</h2>
-    <div id="orderHistoryList"></div>
+  <!-- 🔙 Back button -->
+  <button class="back-btn" onclick="closeOrdersPopup()">⬅ Back</button>
   
-  </div>
+  <h2>My Orders</h2>
+  <div id="orderHistoryList"></div>
+</div>
+
   <div class="success-popup" id="successPopup">🎉 Order Placed Successfully!</div>
   <!-- 🔍 Image Zoom Popup -->
 <div id="imageZoomPopup" class="zoom-popup" style="display:none;">
@@ -2479,7 +2508,7 @@ function downloadInvoice(orderStr) {
 function scrollToCategory(sectionId) {
   const section = document.getElementById(sectionId);
   if (section) {
-    const headerOffset = 230; // fixed header ki height
+    const headerOffset = 305; // fixed header ki height
     const elementPosition = section.getBoundingClientRect().top + window.scrollY;
     const offsetPosition = elementPosition - headerOffset;
 
@@ -2892,6 +2921,10 @@ window.addEventListener("scroll", () => {
     btn.style.color = "white";
     btn.style.transform = "scale(1.05)";
   }
+function closeOrdersPopup() {
+  const popup = document.getElementById("ordersPopup");
+  if (popup) popup.style.display = "none";  // popup ko band karega
+}
 
 
 updateRewardTracker();
