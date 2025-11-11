@@ -2310,10 +2310,27 @@ function addToCart(index) {
 
   updateCart();
 
+  // ✅ Safe popup logic
   const popup = document.getElementById('addPopup');
+  if (!popup) {
+    console.warn("⚠️ addPopup element not found in DOM yet!");
+    return;
+  }
+
+  popup.innerText = `✅ ${items[index].name} added to cart!`;
   popup.style.display = 'block';
-  setTimeout(() => popup.style.display = 'none', 1500);  
+  popup.style.opacity = '1';
+  popup.style.transform = 'translateY(0)';
+  popup.style.transition = 'all 0.3s ease';
+
+  // Hide after 1.5s
+  setTimeout(() => {
+    popup.style.opacity = '0';
+    popup.style.transform = 'translateY(20px)';
+    setTimeout(() => popup.style.display = 'none', 300);
+  }, 1500);
 }
+
 
 function updateCart() {
   cartItems.innerHTML = '';
