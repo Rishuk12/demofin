@@ -2000,6 +2000,136 @@ function setActiveButton(btn) {
 #vegGrid > .item-card {
   min-height: 270px !important;
 }
+/* ✅ GRID: Always 2 cards per row (responsive) */
+.grid,
+#vegGrid,
+#fruitGrid,
+#flowerGrid,
+#groceryGrid,
+#bihariSnacksGrid,
+#milkProductsGrid,
+#panditPujaGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  justify-items: center !important;
+  align-items: start !important;
+}
+
+/* 📱 Small phones (width < 400px) → 1 card per row */
+@media (max-width: 400px) {
+  .grid,
+  #vegGrid,
+  #fruitGrid,
+  #flowerGrid,
+  #groceryGrid,
+  #bihariSnacksGrid,
+  #milkProductsGrid,
+  #panditPujaGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ✅ CARD STYLE – fixed height & perfect spacing */
+.card,
+.item-card {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 170px !important;
+  background: #fff !important;
+  border-radius: 14px !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  padding-bottom: 10px !important;
+  min-height: 280px !important;
+  overflow: visible !important;
+  transition: transform 0.25s ease !important;
+}
+
+.card:hover,
+.item-card:hover {
+  transform: scale(1.02);
+}
+
+/* 🖼️ IMAGE – same crop as first screenshot */
+.card img,
+.item-card img {
+  width: 100% !important;
+  height: 55% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 14px 14px 0 0 !important;
+  display: block !important;
+}
+
+/* 🧾 TITLE */
+.card h2,
+.item-card h3 {
+  font-size: 0.9rem !important;
+  text-align: center !important;
+  margin: 8px 0 4px !important;
+  height: 36px !important;
+  overflow: hidden !important;
+}
+
+/* 💰 PRICE TEXT */
+.card p,
+.item-card p {
+  font-size: 0.8rem !important;
+  margin: 2px 0 !important;
+  text-align: center !important;
+}
+
+/* ➕ QUANTITY CONTROLS */
+.card .controls,
+.item-card .qty-controls {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin: 4px 0 !important;
+}
+
+.card .controls button,
+.item-card .qty-controls button {
+  width: 28px !important;
+  height: 28px !important;
+  background: #2f7d32 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+
+/* 🟢 ADD BUTTON (visible & aligned perfectly) */
+.card .add-btn,
+.item-card button.add-btn {
+  background: #2f7d32 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  font-size: 0.85rem !important;
+  margin-top: auto !important;
+  margin-bottom: 8px !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  align-self: center !important;
+}
+
+.card .add-btn:hover,
+.item-card button.add-btn:hover {
+  background: #256428 !important;
+}
+
+/* 🧩 Prevent cutting issues */
+.grid,
+section,
+main {
+  overflow: visible !important;
+}
 
 
 </style>
