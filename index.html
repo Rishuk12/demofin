@@ -1929,6 +1929,77 @@ function setActiveButton(btn) {
     grid-template-columns: 1fr !important;
   }
 }
+/* ✅ FINAL 2-COLUMN FIX FOR ALL PRODUCT GRIDS */
+.grid,
+#vegGrid,
+#fruitGrid,
+#flowerGrid,
+#groceryGrid,
+#bihariSnacksGrid,
+#milkProductsGrid,
+#panditPujaGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  justify-items: center !important;
+  align-items: start !important;
+}
+
+/* 📱 Very small screens only (<400px) → single column */
+@media screen and (max-width: 400px) {
+  .grid,
+  #vegGrid,
+  #fruitGrid,
+  #flowerGrid,
+  #groceryGrid,
+  #bihariSnacksGrid,
+  #milkProductsGrid,
+  #panditPujaGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* 🟩 Ensure all cards fit nicely */
+.card,
+.item-card {
+  width: 100% !important;
+  max-width: 170px !important;
+  aspect-ratio: 3 / 4 !important;
+}
+
+/* 🖼️ Image crop same across all devices */
+.card img,
+.item-card img {
+  width: 100% !important;
+  height: 55% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+}
+/* ✅ Fix: Prevent Add button from being cut or hidden */
+.card,
+.item-card {
+  position: relative !important;
+  overflow: visible !important; /* allow button to show fully */
+  padding-bottom: 10px !important; /* extra space below content */
+}
+
+/* 🟩 Ensure internal layout stays balanced */
+.card .add-btn,
+.item-card .add-btn {
+  margin-top: auto !important;
+  margin-bottom: 6px !important;
+  position: relative !important;
+  bottom: 0 !important;
+}
+
+/* 🧾 Optional: keep all cards same height even with extra padding */
+.grid > .card,
+.grid > .item-card,
+#vegGrid > .card,
+#vegGrid > .item-card {
+  min-height: 270px !important;
+}
 
 
 </style>
