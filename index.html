@@ -1814,7 +1814,94 @@ function setActiveButton(btn) {
     border-radius: 30px;
   }
 }
-/* ✅ FINAL UNIVERSAL IMAGE & GRID FIX */
+/* ✅ FINAL UNIVERSAL CARD FIX — for .card and .item-card both */
+.card,
+.item-card {
+  width: 100% !important;
+  max-width: 170px !important;
+  background: #fff !important;
+  border-radius: 14px !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  aspect-ratio: 3 / 4 !important; /* ✅ fix card shape */
+  transition: transform 0.25s ease !important;
+}
+
+.card:hover,
+.item-card:hover {
+  transform: scale(1.02);
+}
+
+/* 🖼️ Image – same as first screenshot (crop style) */
+.card img,
+.item-card img {
+  width: 100% !important;
+  height: 55% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+  border-radius: 0 !important;
+}
+
+/* 🧾 Titles */
+.card h2,
+.item-card h3 {
+  font-size: 0.9rem !important;
+  text-align: center !important;
+  margin: 6px 0 4px !important;
+  height: 36px !important;
+  overflow: hidden !important;
+}
+
+/* 💰 Price text */
+.card p,
+.item-card p {
+  font-size: 0.8rem !important;
+  text-align: center !important;
+  margin: 2px 0 !important;
+}
+
+/* ➕ Quantity controls */
+.card .controls,
+.item-card .qty-controls {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin: 4px 0 !important;
+}
+.card .controls button,
+.item-card .qty-controls button {
+  width: 28px !important;
+  height: 28px !important;
+  background: #2f7d32 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+
+/* 🟢 Add button */
+.card .add-btn,
+.item-card button.add-btn {
+  background: #2f7d32 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  font-size: 0.85rem !important;
+  margin: 4px 0 8px !important;
+  cursor: pointer !important;
+}
+.card .add-btn:hover,
+.item-card button.add-btn:hover {
+  background: #256428 !important;
+}
+
+/* 📱 2 cards per row on all phones */
 .grid,
 #vegGrid,
 #fruitGrid,
@@ -1824,13 +1911,12 @@ function setActiveButton(btn) {
 #milkProductsGrid,
 #panditPujaGrid {
   display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important; /* Always 2 per row */
+  grid-template-columns: repeat(2, 1fr) !important;
   gap: 12px !important;
-  justify-items: center;
-  align-items: start;
+  justify-items: center !important;
 }
 
-/* 📱 Small phones → 1 column */
+/* 📱 very small phones → single column */
 @media (max-width: 400px) {
   .grid,
   #vegGrid,
@@ -1841,91 +1927,6 @@ function setActiveButton(btn) {
   #milkProductsGrid,
   #panditPujaGrid {
     grid-template-columns: 1fr !important;
-  }
-}
-
-/* 🥦 Card */
-.item-card {
-  width: 100% !important;
-  max-width: 170px !important;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  aspect-ratio: 3 / 4 !important; /* fixed ratio */
-  transition: transform 0.25s ease;
-}
-
-.item-card:hover {
-  transform: scale(1.02);
-}
-
-/* 🖼️ Image — crop like first screenshot */
-.item-card img {
-  width: 100% !important;
-  height: 55% !important;
-  object-fit: cover !important;
-  object-position: center !important;
-  display: block;
-}
-
-/* 🧾 Text + Buttons */
-.item-card h3 {
-  font-size: 0.9rem !important;
-  height: 36px;
-  overflow: hidden;
-  margin: 6px 0 4px;
-  text-align: center;
-}
-
-.item-card p {
-  font-size: 0.8rem !important;
-  margin: 2px 0;
-  text-align: center;
-}
-
-.item-card .qty-controls {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin: 4px 0;
-}
-
-.item-card .qty-controls button {
-  width: 28px;
-  height: 28px;
-  background: #2f7d32;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-}
-
-.item-card button.add-btn {
-  background: #2f7d32;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  margin: 4px 0 8px;
-  cursor: pointer;
-}
-
-.item-card button.add-btn:hover {
-  background: #256428;
-}
-
-/* 📱 Realme and other small phones adjustments */
-@media (max-width: 480px) {
-  .item-card {
-    max-width: 160px !important;
-    aspect-ratio: 3 / 4 !important;
-  }
-  .item-card img {
-    height: 52% !important;
   }
 }
 
