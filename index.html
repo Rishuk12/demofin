@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Veg, Phool & Fruits Selector</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -1894,6 +1895,37 @@ function setActiveButton(btn) {
 @media (min-width: 768px) {
   .items-container {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+/* 🟢 FINAL FIX — Realme 12x and all mobile phones */
+.items-container,
+.grid,
+#vegGrid,
+#fruitGrid,
+#flowerGrid,
+#groceryGrid,
+#bihariSnacksGrid,
+#milkProductsGrid,
+#panditPujaGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  justify-items: center !important;
+  align-items: start !important;
+}
+
+/* 🟡 Only for very small devices (<360px) — single column */
+@media (max-width: 360px) {
+  .items-container,
+  .grid,
+  #vegGrid,
+  #fruitGrid,
+  #flowerGrid,
+  #groceryGrid,
+  #bihariSnacksGrid,
+  #milkProductsGrid,
+  #panditPujaGrid {
+    grid-template-columns: 1fr !important;
   }
 }
 
