@@ -1834,6 +1834,17 @@ function setActiveButton(btn) {
 .item-card:hover {
   transform: scale(1.03);
 }
+@media (max-width: 420px) {
+  .items-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 320px) {
+  .items-container {
+    grid-template-columns: 1fr;
+  }
+}
 
 
 </style>
