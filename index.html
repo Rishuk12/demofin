@@ -1845,6 +1845,57 @@ function setActiveButton(btn) {
     grid-template-columns: 1fr;
   }
 }
+.items-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  justify-content: center;
+  padding: 10px;
+}
+
+/* Product Card Styling */
+.item-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  text-align: center;
+  padding: 10px;
+  transition: transform 0.2s ease-in-out;
+}
+.item-card:hover {
+  transform: scale(1.03);
+}
+
+/* Product Image */
+.item-card img {
+  width: 100%;
+  height: auto;
+  max-height: 130px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* For mid-size phones (like Realme 12x, Redmi Note etc.) */
+@media (max-width: 420px) {
+  .items-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+/* For smaller phones */
+@media (max-width: 350px) {
+  .items-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* For tablets and large screens */
+@media (min-width: 768px) {
+  .items-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 
 
 </style>
