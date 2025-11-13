@@ -1977,7 +1977,50 @@ function setActiveButton(btn) {
   #panditPujaGrid {
     grid-template-columns: 1fr !important;
   }
+}/* ✅ REALME 12x FINAL GRID FIX */
+.items-container,
+.grid,
+#vegGrid,
+#fruitGrid,
+#flowerGrid,
+#groceryGrid,
+#bihariSnacksGrid,
+#milkProductsGrid,
+#panditPujaGrid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 12px !important;
 }
+
+.items-container > div,
+.grid > div,
+#vegGrid > div,
+#fruitGrid > div,
+#flowerGrid > div,
+#groceryGrid > div,
+#bihariSnacksGrid > div,
+#milkProductsGrid > div,
+#panditPujaGrid > div {
+  flex: 0 0 calc(50% - 10px) !important; /* 🔥 2 items per row */
+  box-sizing: border-box !important;
+}
+
+/* 🔸 Very small screens (<360px) → 1 column */
+@media (max-width: 360px) {
+  .items-container > div,
+  .grid > div,
+  #vegGrid > div,
+  #fruitGrid > div,
+  #flowerGrid > div,
+  #groceryGrid > div,
+  #bihariSnacksGrid > div,
+  #milkProductsGrid > div,
+  #panditPujaGrid > div {
+    flex: 0 0 100% !important;
+  }
+}
+
 
 
 </style>
