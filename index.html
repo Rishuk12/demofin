@@ -1928,6 +1928,56 @@ function setActiveButton(btn) {
     grid-template-columns: 1fr !important;
   }
 }
+/* ✅ FINAL 2-COLUMN FIX FOR ALL MOBILE PHONES (Realme tested) */
+:root {
+  --grid-gap: 12px;
+}
+
+.items-container,
+.grid,
+#vegGrid,
+#fruitGrid,
+#flowerGrid,
+#groceryGrid,
+#bihariSnacksGrid,
+#milkProductsGrid,
+#panditPujaGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: var(--grid-gap) !important;
+  justify-items: center !important;
+  align-items: start !important;
+}
+
+/* 📱 Extra force for WebKit (Realme / MIUI browsers) */
+@supports (-webkit-touch-callout: none) {
+  .items-container,
+  .grid,
+  #vegGrid,
+  #fruitGrid,
+  #flowerGrid,
+  #groceryGrid,
+  #bihariSnacksGrid,
+  #milkProductsGrid,
+  #panditPujaGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* 🔸 Very small screens (<360px) → single column */
+@media (max-width: 360px) {
+  .items-container,
+  .grid,
+  #vegGrid,
+  #fruitGrid,
+  #flowerGrid,
+  #groceryGrid,
+  #bihariSnacksGrid,
+  #milkProductsGrid,
+  #panditPujaGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
 
 
 </style>
