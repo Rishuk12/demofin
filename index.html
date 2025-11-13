@@ -1814,6 +1814,26 @@ function setActiveButton(btn) {
     border-radius: 30px;
   }
 }
+.items-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  justify-content: center;
+  padding: 10px;
+}
+
+.item-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  padding: 10px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.item-card:hover {
+  transform: scale(1.03);
+}
 
 
 </style>
